@@ -1,0 +1,20 @@
+services:
+  order_flow:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+      - PORT=3000
+    networks:
+      - supabase_default
+    restart: unless-stopped
+
+networks:
+  supabase_default:
+    external: true
+    name: supabase_default  # This will connect to the Supabase network
