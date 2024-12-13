@@ -7,7 +7,7 @@ export const OrderStatus = {
 
 export const orderSchema = z.object({
   id: z.string(),
-  number: z.number(),
+  order_id: z.string(),
   name: z.string(),
   status: z.enum([OrderStatus.PREPARING, OrderStatus.COMPLETED]),
   createdAt: z.string(),
