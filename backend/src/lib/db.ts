@@ -1,15 +1,11 @@
-import { createClient } from "@supabase/supabase-js";
-import dotenv from "dotenv";
+import 'dotenv/config';
+import { drizzle } from 'drizzle-orm/postgres-js';
+import postgres from 'postgres';
 
-// Load environment variables from .env file
-dotenv.config();
-
-if (!process.env.SUPABASE_URL) {
-  throw new Error("SUPABASE_URL is required");
+if (!process.env.DATABASE_URL) {
+  throw new Error("DATABASE_URL is required");
 }
 
-if (!process.env.SUPABASE_ANON_KEY) {
-  throw new Error("SUPABASE_ANON_KEY is required");
-}
-
-export const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
+// Disable prefetch as it is not supported for "Transaction" pool mode
+export const client = postgres(process.env.DATABASE_URL, { prepare: false });
+export const db = drizzle(client);
