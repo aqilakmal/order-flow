@@ -1,16 +1,39 @@
-FROM node:20-slim AS builder
+FROM node:20-alpine AS base
 
+# Build stage
+FROM base AS builder
 WORKDIR /app
+
+# Install build dependencies
 COPY package*.json ./
-RUN npm install
-COPY . .
+RUN npm ci
+
+# Copy source code and build
+COPY tsconfig.json ./
+COPY src ./src
 RUN npm run build
 
-FROM node:20-slim AS runner
-WORKDIR /app
-COPY package*.json ./
-RUN npm install --production
-COPY --from=builder /app/dist ./dist
+# Prune dev dependencies
+RUN npm prune --production
 
+# Runtime stage
+FROM base AS runner
+WORKDIR /app
+
+# Create non-root user for security
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 hono
+
+# Copy built artifacts and production dependencies
+COPY --from=builder --chown=hono:nodejs /app/dist ./dist
+COPY --from=builder --chown=hono:nodejs /app/node_modules ./node_modules
+COPY --from=builder --chown=hono:nodejs /app/package.json ./package.json
+
+# Switch to non-root user
+USER hono
+
+# Expose the port the app runs on
 EXPOSE 3000
-CMD ["npm", "start"] 
+
+# Start the application
+CMD ["node", "dist/server.js"]

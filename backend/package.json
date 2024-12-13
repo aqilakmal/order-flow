@@ -2,27 +2,29 @@
   "name": "order-tracking-backend",
   "version": "1.0.0",
   "description": "Backend for Order Tracking Application",
-  "main": "dist/index.js",
+  "main": "dist/server.js",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
+    "dev": "tsx watch src/server.ts",
     "build": "tsc",
-    "start": "node dist/index.js",
+    "start": "node dist/server.js",
     "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,css,md,json}\"",
     "format:check": "prettier --check \"src/**/*.{js,jsx,ts,tsx,css,md,json}\""
   },
   "dependencies": {
     "@hono/node-server": "^1.13.7",
-    "@supabase/supabase-js": "^2.39.0",
     "dotenv": "^16.3.1",
     "hono": "^4.6.13",
     "nanoid": "^3.3.4",
-    "zod": "^3.22.4"
+    "zod": "^3.22.4",
+    "drizzle-orm": "^0.29.3",
+    "postgres": "^3.4.3"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",
     "prettier": "^3.1.1",
     "tsx": "^4.7.0",
-    "typescript": "^5.3.0"
+    "typescript": "^5.7.2",
+    "drizzle-kit": "^0.20.14"
   },
   "type": "module"
 }

@@ -7,8 +7,7 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
-      - SUPABASE_URL=${SUPABASE_URL}
-      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+      - DATABASE_URL=postgres://postgres:your-super-secret-and-long-postgres-password@db:5432/postgres?sslmode=disable
       - PORT=3000
     networks:
       - supabase_default
@@ -17,4 +16,4 @@ services:
 networks:
   supabase_default:
     external: true
-    name: supabase_default  # This will connect to the Supabase network
+    name: supabase_default
