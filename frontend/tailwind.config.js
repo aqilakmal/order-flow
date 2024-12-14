@@ -12,7 +12,21 @@ export default {
   		}
   	},
   	extend: {
+  		fontFamily: {
+  			poppins: ['Poppins', 'sans-serif'],
+  		},
   		colors: {
+				brand: {
+					100: '#FEECE5',
+					200: '#FDC1AD',
+					300: '#FC9674',
+					400: '#FC6C3C',
+					500: '#FA4304',
+					600: '#C83403',
+					700: '#962702',
+					800: '#641A01',
+					900: '#320D00',
+				},
   			border: 'hsl(var(--border))',
   			input: 'hsl(var(--input))',
   			ring: 'hsl(var(--ring))',
