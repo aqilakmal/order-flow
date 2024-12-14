@@ -1,5 +1,4 @@
 import { Button } from "./ui/button";
-import { X as BackspaceIcon } from "lucide-react";
 
 interface NumPadProps {
   value: string;
@@ -8,37 +7,36 @@ interface NumPadProps {
 }
 
 export function NumPad({ value, onChange, onEnter }: NumPadProps) {
-  const buttons = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'backspace', '0', 'enter'];
+  const buttons = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "del", "0", "enter"];
 
   const handleClick = (button: string) => {
-    if (button === 'backspace') {
+    if (button === "del") {
       onChange(value.slice(0, -1));
-    } else if (button === 'enter') {
-      onEnter();
+    } else if (button === "enter") {
+      if (value.length === 3) onEnter();
     } else {
-      onChange(value + button);
+      if (value.length < 3) onChange(value + button);
     }
   };
 
   return (
-    <div className="grid grid-cols-3 gap-4 p-4 w-full max-w-md mx-auto">
+    <div className="mx-auto grid w-full grid-cols-3 gap-3 px-4">
       {buttons.map((button) => (
         <Button
           key={button}
-          className={`h-20 text-3xl ${
-            button === 'enter' ? 'bg-green-600 hover:bg-green-700' : ''
+          className={`h-16 text-2xl leading-none ${
+            button === "enter"
+              ? value.length === 3
+                ? "bg-green-600 hover:bg-green-700"
+                : "cursor-not-allowed opacity-50"
+              : ""
           }`}
           onClick={() => handleClick(button)}
+          disabled={button === "enter" && value.length !== 3}
         >
-          {button === 'backspace' ? (
-            <BackspaceIcon className="h-8 w-8" />
-          ) : button === 'enter' ? (
-            'Enter'
-          ) : (
-            button
-          )}
+          {button === "enter" ? <span className="leading-none">Enter</span> : button}
         </Button>
       ))}
     </div>
   );
-} 
+}

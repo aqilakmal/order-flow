@@ -7,15 +7,17 @@ export function cn(...inputs: ClassValue[]) {
 
 export function formatTimestamp(date: Date | string | number, lastUpdated?: number): string {
   const timestamp = new Date(date);
-  const formatted = timestamp.toLocaleString('en-US', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false,
-  });
+  const formatted = timestamp
+    .toLocaleString("en-US", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true,
+    })
+    .replace(/(\d+)\/(\d+)\/(\d+)/, "$3/$1/$2");
 
   if (lastUpdated) {
     const secondsAgo = Math.floor((Date.now() - lastUpdated) / 1000);
