@@ -1,4 +1,4 @@
-import { PlusIcon, TrashIcon, CheckIcon } from "@heroicons/react/24/outline";
+import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Button } from "../components/ui/button";
@@ -14,12 +14,7 @@ import { useToast } from "../hooks/use-toast";
 import { createOrder, getOrders, updateOrderStatus, deleteOrder } from "../services/api";
 import { OrderStatus, type Order } from "../types/order";
 import { formatTimestamp } from "../lib/utils";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "../components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../components/ui/dialog";
 import { NumPad } from "../components/NumPad";
 
 type UpdateOrderStatusParams = {
@@ -29,7 +24,7 @@ type UpdateOrderStatusParams = {
 
 export default function AdminPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [inputStep, setInputStep] = useState<'orderId' | 'name'>('orderId');
+  const [inputStep, setInputStep] = useState<"orderId" | "name">("orderId");
   const [newOrder, setNewOrder] = useState<{ order_id: string; name: string }>({
     order_id: "",
     name: "",
@@ -40,16 +35,26 @@ export default function AdminPage() {
   const { data: orders = [], dataUpdatedAt } = useQuery({
     queryKey: ["orders"],
     queryFn: getOrders,
-    refetchInterval: 10000,
+    refetchInterval: 5000,
+    select: (data) => {
+      // Sort orders by createdAt date, most recent first
+      return [...data].sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+    },
   });
 
   const createOrderMutation = useMutation({
-    mutationFn: (data: Omit<Order, "id" | "createdAt">) => createOrder(data),
+    mutationFn: (data: { order_id: string; name: string }) =>
+      createOrder({
+        ...data,
+        status: OrderStatus.PREPARING,
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["orders"] });
       toast({
-        title: "Success",
-        description: "Order created successfully",
+        title: "Berhasil",
+        description: "Pesanan berhasil dibuat",
       });
       setNewOrder({ order_id: "", name: "" });
     },
@@ -60,8 +65,8 @@ export default function AdminPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["orders"] });
       toast({
-        title: "Success",
-        description: "Order status updated successfully",
+        title: "Berhasil",
+        description: "Status pesanan berhasil diperbarui",
       });
     },
   });
@@ -71,31 +76,28 @@ export default function AdminPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["orders"] });
       toast({
-        title: "Success",
-        description: "Order deleted successfully",
+        title: "Berhasil",
+        description: "Pesanan berhasil dihapus",
       });
     },
   });
 
   const handleAddOrderClick = () => {
     setIsModalOpen(true);
-    setInputStep('orderId');
+    setInputStep("orderId");
     setNewOrder({ order_id: "", name: "" });
   };
 
   const handleOrderIdComplete = () => {
     if (newOrder.order_id) {
-      setInputStep('name');
+      setInputStep("name");
     }
   };
 
   const handleNameComplete = () => {
     if (newOrder.name) {
       setIsModalOpen(false);
-      createOrderMutation.mutate({
-        ...newOrder,
-        status: OrderStatus.PREPARING,
-      });
+      createOrderMutation.mutate(newOrder);
     }
   };
 
@@ -103,128 +105,160 @@ export default function AdminPage() {
   const isStale = timeSinceLastUpdate > 30;
 
   return (
-    <div className="container mx-auto py-10 space-y-8">
-      <div className="space-y-2">
-        <div className="flex justify-between items-center">
-          <h1 className="text-4xl font-bold">Order Management</h1>
-          <Button onClick={handleAddOrderClick} className="text-xl p-6 gap-2">
-            <PlusIcon className="h-6 w-6" />
-            Add New Order
-          </Button>
-        </div>
-        <div className={`flex items-center gap-2 ${isStale ? 'text-red-500' : 'text-green-500'}`}>
-          <div className={`w-2 h-2 rounded-full ${isStale ? 'bg-red-500' : 'bg-green-500'}`} />
-          <span className="text-lg font-medium">
-            {formatTimestamp(new Date(), dataUpdatedAt)}
-          </span>
+    <div className="relative h-screen overflow-hidden bg-[#FFDFB5] font-poppins">
+      <div className="h-[calc(100vh-2rem)] overflow-y-auto">
+        <div className="container mx-auto space-y-8 py-10">
+          <div className="flex items-center justify-between">
+            <h1 className="text-3xl font-semibold text-neutral-800">Manajemen Pesanan</h1>
+            <Button
+              onClick={handleAddOrderClick}
+              className="gap-2 rounded-xl bg-neutral-800 p-6 text-lg text-white hover:bg-green-500"
+            >
+              <PlusIcon className="h-6 w-6" />
+              Tambah Pesanan
+            </Button>
+          </div>
+
+          <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+            <DialogContent className="rounded-xl sm:max-w-[600px]">
+              <DialogHeader>
+                <DialogTitle className="text-center text-2xl">
+                  {inputStep === "orderId" ? "Masukkan ID Pesanan" : "Masukkan Nama Pelanggan"}
+                </DialogTitle>
+              </DialogHeader>
+
+              <div className="flex flex-col items-center gap-6 py-4">
+                <div className="w-full px-4">
+                  <input
+                    type="text"
+                    className="w-full rounded-xl bg-gray-100 p-4 text-center text-4xl leading-relaxed focus:outline-none"
+                    value={inputStep === "orderId" ? `F-xxxx${newOrder.order_id}` : newOrder.name}
+                    readOnly
+                    placeholder={inputStep === "orderId" ? "F-xxxx___" : "Nama Pelanggan"}
+                  />
+                </div>
+
+                {inputStep === "orderId" ? (
+                  <NumPad
+                    value={newOrder.order_id}
+                    onChange={(value) => setNewOrder({ ...newOrder, order_id: value })}
+                    onEnter={handleOrderIdComplete}
+                  />
+                ) : (
+                  <div className="w-full px-4">
+                    <input
+                      type="text"
+                      className="w-full rounded-xl border p-4 text-4xl leading-relaxed focus:outline-none"
+                      value={newOrder.name}
+                      onChange={(e) => setNewOrder({ ...newOrder, name: e.target.value })}
+                      onKeyDown={(e) => e.key === "Enter" && handleNameComplete()}
+                      autoFocus
+                      placeholder="Ketik nama pelanggan..."
+                    />
+                    <Button
+                      className="mt-4 h-16 w-full rounded-xl p-6 text-xl"
+                      onClick={handleNameComplete}
+                    >
+                      Tampilkan Pesanan
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          <div className="overflow-hidden rounded-xl border bg-white">
+            <Table>
+              <TableHeader className="bg-white">
+                <TableRow>
+                  <TableHead className="py-4 pl-6 text-lg text-neutral-600">Pesanan</TableHead>
+                  <TableHead className="text-lg text-neutral-600">Status</TableHead>
+                  <TableHead className="text-lg text-neutral-600">Aksi</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {orders.map((order) => (
+                  <TableRow key={order.id} className="hover:bg-white">
+                    <TableCell className="py-6 pl-6">
+                      <div className="space-y-2">
+                        <div className="flex items-baseline text-4xl font-bold tracking-tight text-neutral-800">
+                          <span>F-</span>
+                          <span className="font-normal text-neutral-400">xxxx</span>
+                          <span>{order.order_id}</span>
+                        </div>
+                        <div className="text-lg text-neutral-600">{order.name}</div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="py-4">
+                      <div className="space-y-3">
+                        <span
+                          className={`inline-flex items-center rounded-full px-4 py-2 text-sm font-medium ${
+                            order.status === OrderStatus.PREPARING
+                              ? "bg-brand-500 text-white"
+                              : "bg-green-500 text-white"
+                          }`}
+                        >
+                          {order.status === OrderStatus.PREPARING ? "Sedang di Masak" : "Selesai"}
+                        </span>
+                        <div className="text-sm text-neutral-500">
+                          <div className="flex items-center gap-1">
+                            <span>Diperbarui:</span>
+                            {formatTimestamp(order.updatedAt)}
+                          </div>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="py-4 pr-6">
+                      <div className="flex flex-col gap-2">
+                        <Button
+                          variant="outline"
+                          className={`rounded-xl px-6 py-6 text-base font-medium ${
+                            order.status === OrderStatus.PREPARING
+                              ? "bg-neutral-800 text-white hover:bg-green-500 hover:text-white"
+                              : "bg-neutral-100 text-neutral-800 hover:bg-brand-500 hover:text-white"
+                          }`}
+                          onClick={() =>
+                            updateStatusMutation.mutate({
+                              id: order.id,
+                              status:
+                                order.status === OrderStatus.PREPARING
+                                  ? OrderStatus.COMPLETED
+                                  : OrderStatus.PREPARING,
+                            })
+                          }
+                        >
+                          {order.status === OrderStatus.PREPARING ? "Selesai" : "Masak Ulang"}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          className="rounded-xl border-neutral-200 bg-white py-6 text-neutral-800 hover:bg-red-500 hover:text-white"
+                          onClick={() => deleteOrderMutation.mutate(order.id)}
+                        >
+                          <TrashIcon className="mr-2 h-5 w-5" />
+                          Hapus
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </div>
       </div>
 
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="sm:max-w-[600px]">
-          <DialogHeader>
-            <DialogTitle className="text-2xl text-center">
-              {inputStep === 'orderId' ? 'Enter Order ID' : 'Enter Customer Name'}
-            </DialogTitle>
-          </DialogHeader>
-          
-          <div className="flex flex-col items-center gap-6 py-4">
-            <div className="w-full px-4">
-              <input
-                type="text"
-                className="w-full text-4xl p-4 text-center rounded-lg border"
-                value={inputStep === 'orderId' ? newOrder.order_id : newOrder.name}
-                readOnly
-                placeholder={inputStep === 'orderId' ? "Order ID" : "Customer Name"}
-              />
-            </div>
-
-            {inputStep === 'orderId' ? (
-              <NumPad
-                value={newOrder.order_id}
-                onChange={(value) => setNewOrder({ ...newOrder, order_id: value })}
-                onEnter={handleOrderIdComplete}
-              />
-            ) : (
-              <div className="w-full px-4">
-                <input
-                  type="text"
-                  className="w-full text-4xl p-4 rounded-lg border"
-                  value={newOrder.name}
-                  onChange={(e) => setNewOrder({ ...newOrder, name: e.target.value })}
-                  onKeyDown={(e) => e.key === 'Enter' && handleNameComplete()}
-                  autoFocus
-                  placeholder="Type customer name..."
-                />
-                <Button 
-                  className="w-full mt-4 p-6 text-xl"
-                  onClick={handleNameComplete}
-                >
-                  Submit Order
-                </Button>
-              </div>
-            )}
+      <div className="fixed bottom-0 left-0 right-0 z-10 bg-neutral-800 px-4 py-2">
+        <div className="mx-2 flex items-center justify-between">
+          <div className="flex-1">
+            <h1 className="text-sm text-neutral-200">Order Flow</h1>
           </div>
-        </DialogContent>
-      </Dialog>
-
-      <div className="rounded-lg border bg-card shadow-sm">
-        <Table>
-          <TableHeader>
-            <TableRow className="bg-muted/50">
-              <TableHead className="text-xl">Order ID</TableHead>
-              <TableHead className="text-xl">Customer Name</TableHead>
-              <TableHead className="text-xl">Status</TableHead>
-              <TableHead className="text-xl">Created At</TableHead>
-              <TableHead className="text-xl">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {orders.map((order) => (
-              <TableRow key={order.id} className="hover:bg-muted/50">
-                <TableCell className="font-medium text-lg">{order.order_id}</TableCell>
-                <TableCell className="text-lg">{order.name}</TableCell>
-                <TableCell>
-                  <span className={`inline-flex items-center rounded-full px-3 py-1 text-lg font-medium ${
-                    order.status === OrderStatus.PREPARING
-                      ? 'bg-yellow-100 text-yellow-800'
-                      : 'bg-green-100 text-green-800'
-                  }`}>
-                    {order.status}
-                  </span>
-                </TableCell>
-                <TableCell className="text-lg">{formatTimestamp(order.createdAt)}</TableCell>
-                <TableCell>
-                  <div className="flex gap-2">
-                    {order.status === OrderStatus.PREPARING && (
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className="h-12 w-12"
-                        onClick={() =>
-                          updateStatusMutation.mutate({
-                            id: order.id,
-                            status: OrderStatus.COMPLETED,
-                          })
-                        }
-                      >
-                        <CheckIcon className="h-6 w-6" />
-                      </Button>
-                    )}
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="h-12 w-12 text-red-600 hover:text-red-700"
-                      onClick={() => deleteOrderMutation.mutate(order.id)}
-                    >
-                      <TrashIcon className="h-6 w-6" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+          <div className={`flex items-center gap-2 ${isStale ? "text-red-500" : "text-green-500"}`}>
+            <div
+              className={`h-2 w-2 animate-pulse rounded-full ${isStale ? "bg-red-500" : "bg-green-500"}`}
+            />
+            <span className="text-sm">{formatTimestamp(new Date(), dataUpdatedAt)}</span>
+          </div>
+        </div>
       </div>
     </div>
   );
