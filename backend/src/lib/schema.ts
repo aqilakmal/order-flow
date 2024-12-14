@@ -6,4 +6,5 @@ export const orders = pgTable("orders", {
   name: text("name").notNull(),
   status: text("status", { enum: ["preparing", "completed"] }).notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

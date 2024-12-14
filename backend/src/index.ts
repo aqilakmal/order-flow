@@ -20,11 +20,13 @@ const orderSchema = z.object({
   name: z.string(),
   status: z.enum([OrderStatus.PREPARING, OrderStatus.COMPLETED]),
   createdAt: z.string(),
+  updatedAt: z.string(),
 });
 
 const createOrderSchema = orderSchema.omit({
   id: true,
   createdAt: true,
+  updatedAt: true,
 });
 
 // Hello World
@@ -55,11 +57,12 @@ app.get("/health", async (c) => {
 // Routes
 app.get("/orders", async (c) => {
   try {
-    const data = await db.select().from(orders).orderBy(orders.createdAt);
+    const data = await db.select().from(orders).orderBy(orders.updatedAt);
     return c.json(
       data.map((order) => ({
         ...order,
-        createdAt: order.createdAt,
+        createdAt: order.createdAt.toISOString(),
+        updatedAt: order.updatedAt.toISOString(),
       }))
     );
   } catch (error) {
@@ -92,10 +95,12 @@ app.post("/orders", async (c) => {
 
   try {
     const validatedData = createOrderSchema.parse(body);
+    const now = new Date();
     const newOrder = {
       ...validatedData,
       id: nanoid(),
-      createdAt: new Date(),
+      createdAt: now,
+      updatedAt: now,
     };
 
     const [data] = await db.insert(orders).values(newOrder).returning();
@@ -103,6 +108,7 @@ app.post("/orders", async (c) => {
     return c.json({
       ...data,
       createdAt: data.createdAt,
+      updatedAt: data.updatedAt,
     });
   } catch (error) {
     return c.json({ error: "Invalid order data" }, 400);
@@ -116,7 +122,10 @@ app.patch("/orders/:id", async (c) => {
   try {
     const [data] = await db
       .update(orders)
-      .set({ status: body.status })
+      .set({
+        status: body.status,
+        updatedAt: new Date(),
+      })
       .where(eq(orders.id, id))
       .returning();
 
@@ -127,6 +136,7 @@ app.patch("/orders/:id", async (c) => {
     return c.json({
       ...data,
       createdAt: data.createdAt,
+      updatedAt: data.updatedAt,
     });
   } catch (error) {
     return c.json({ error: "Invalid status" }, 400);
