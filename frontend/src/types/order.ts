@@ -11,6 +11,7 @@ export const orderSchema = z.object({
   name: z.string(),
   status: z.enum([OrderStatus.PREPARING, OrderStatus.COMPLETED]),
   createdAt: z.string(),
+  updatedAt: z.string(),
 });
 
 export type Order = z.infer<typeof orderSchema>;
@@ -18,6 +19,7 @@ export type Order = z.infer<typeof orderSchema>;
 export const createOrderSchema = orderSchema.omit({
   id: true,
   createdAt: true,
+  updatedAt: true,
 });
 
 // Export the schema for validation

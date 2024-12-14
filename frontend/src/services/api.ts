@@ -8,12 +8,12 @@ export async function getOrders(): Promise<OrderType[]> {
   try {
     return data.map((order: unknown) => Order.parse(order));
   } catch (error) {
-    console.error('Order validation failed:', error);
+    console.error("Order validation failed:", error);
     throw error;
   }
 }
 
-export async function createOrder(data: Omit<OrderType, "id" | "createdAt">) {
+export async function createOrder(data: Omit<OrderType, "id" | "createdAt" | "updatedAt">) {
   const validatedData = createOrderSchema.parse(data);
   const response = await fetch(`${API_URL}/orders`, {
     method: "POST",
