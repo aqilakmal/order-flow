@@ -25,6 +25,8 @@ export async function signIn(email: string, password: string) {
     headers: {
       "Content-Type": "application/json",
     },
+    mode: 'cors',
+    credentials: 'include',
     body: JSON.stringify({ email, password }),
   });
   
@@ -43,6 +45,8 @@ export async function signUp(email: string, password: string) {
     headers: {
       "Content-Type": "application/json",
     },
+    mode: 'cors',
+    credentials: 'include',
     body: JSON.stringify({ email, password }),
   });
   
@@ -59,6 +63,8 @@ export async function validateSession(token: string) {
     headers: {
       Authorization: `Bearer ${token}`,
     },
+    mode: 'cors',
+    credentials: 'include',
   });
   
   if (!response.ok) {

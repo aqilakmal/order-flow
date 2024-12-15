@@ -17,6 +17,8 @@ function getAuthHeader(): HeadersInit {
   return {
     Authorization: `Bearer ${access_token}`,
     "Content-Type": "application/json",
+    mode: 'cors',
+    credentials: 'include',
   };
 }
 

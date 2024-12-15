@@ -13,24 +13,20 @@ console.log('CORS configuration:', {
 
 const app = new Hono();
 
-// Configure CORS with wildcard first to debug
-app.use('*', async (c, next) => {
-  // Add CORS headers manually
-  c.res.headers.set('Access-Control-Allow-Origin', 'https://sewurasa.utf.sh');
-  c.res.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-  c.res.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  c.res.headers.set('Access-Control-Allow-Credentials', 'true');
-  
-  // Handle preflight requests
-  if (c.req.method === 'OPTIONS') {
-    return new Response(null, {
-      status: 204,
-      headers: c.res.headers
-    });
-  }
-
-  await next();
+// Add OPTIONS handler for pre-flight requests
+app.options('*', (c) => {
+  return c.text('', 204);
 });
+
+// Configure CORS - more permissive configuration
+app.use(cors({
+  origin: '*',  // More permissive for testing
+  allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowHeaders: ['*'],  // Allow all headers
+  exposeHeaders: ['*'],
+  credentials: true,
+  maxAge: 3600,
+}));
 
 // Mount routes
 app.route("/auth", authRoutes);
