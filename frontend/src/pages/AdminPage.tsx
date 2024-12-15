@@ -1,4 +1,4 @@
-import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { PlusIcon, TrashIcon, ArrowLeftStartOnRectangleIcon } from "@heroicons/react/24/outline";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Button } from "../components/ui/button";
@@ -16,6 +16,7 @@ import { OrderStatus, type Order } from "../types/order";
 import { formatTimestamp } from "../lib/utils";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../components/ui/dialog";
 import { NumPad } from "../components/NumPad";
+import { useAuth } from "../hooks/use-auth";
 
 type UpdateOrderStatusParams = {
   id: string;
@@ -31,6 +32,7 @@ export default function AdminPage() {
   });
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { clearAuth } = useAuth();
 
   const { data: orders = [], dataUpdatedAt } = useQuery({
     queryKey: ["orders"],
@@ -104,19 +106,34 @@ export default function AdminPage() {
   const timeSinceLastUpdate = Math.floor((Date.now() - dataUpdatedAt) / 1000);
   const isStale = timeSinceLastUpdate > 30;
 
+  const handleLogout = () => {
+    clearAuth();
+    // The ProtectedRoute component will automatically redirect to /auth
+  };
+
   return (
-    <div className="relative h-screen overflow-hidden bg-[#FFDFB5] font-poppins">
+    <div className="relative h-screen overflow-hidden bg-[#FFDFB5]">
       <div className="h-[calc(100vh-2rem)] overflow-y-auto">
         <div className="container mx-auto space-y-8 py-10">
           <div className="flex items-center justify-between">
             <h1 className="text-3xl font-semibold text-neutral-800">Manajemen Pesanan</h1>
-            <Button
-              onClick={handleAddOrderClick}
-              className="gap-2 rounded-xl bg-neutral-800 p-6 text-lg text-white hover:bg-green-500"
-            >
-              <PlusIcon className="h-6 w-6" />
-              Tambah Pesanan
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                onClick={handleLogout}
+                variant="outline"
+                className="gap-2 rounded-xl border-neutral-300 p-6 text-lg text-neutral-800 hover:bg-red-500 hover:text-white"
+              >
+                <ArrowLeftStartOnRectangleIcon className="h-6 w-6" />
+                Keluar
+              </Button>
+              <Button
+                onClick={handleAddOrderClick}
+                className="gap-2 rounded-xl bg-neutral-800 p-6 text-lg text-white hover:bg-green-500"
+              >
+                <PlusIcon className="h-6 w-6" />
+                Tambah Pesanan
+              </Button>
+            </div>
           </div>
 
           <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>

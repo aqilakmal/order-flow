@@ -22,7 +22,7 @@ export default function DisplayPage() {
   const isStale = timeSinceLastUpdate > 30; // Consider data stale after 30 seconds
 
   return (
-    <div className="relative h-screen overflow-hidden bg-[#FFDFB5] font-poppins">
+    <div className="relative h-screen overflow-hidden bg-[#FFDFB5]">
       <div className="grid h-[calc(100vh-2rem)] grid-cols-2 gap-x-6">
         {/* Preparing Orders Column */}
         <div className="flex h-full flex-col overflow-hidden">
