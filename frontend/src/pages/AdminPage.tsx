@@ -122,6 +122,7 @@ export default function AdminPage() {
                 onClick={handleLogout}
                 variant="outline"
                 className="gap-2 rounded-xl border-neutral-300 p-6 text-lg text-neutral-800 hover:bg-red-500 hover:text-white"
+                disabled={createOrderMutation.isPending}
               >
                 <ArrowLeftStartOnRectangleIcon className="h-6 w-6" />
                 Keluar
@@ -129,9 +130,10 @@ export default function AdminPage() {
               <Button
                 onClick={handleAddOrderClick}
                 className="gap-2 rounded-xl bg-neutral-800 p-6 text-lg text-white hover:bg-green-500"
+                disabled={createOrderMutation.isPending}
               >
                 <PlusIcon className="h-6 w-6" />
-                Tambah Pesanan
+                {createOrderMutation.isPending ? "Menambahkan..." : "Tambah Pesanan"}
               </Button>
             </div>
           </div>
@@ -175,8 +177,9 @@ export default function AdminPage() {
                     <Button
                       className="mt-4 h-16 w-full rounded-xl p-6 text-xl"
                       onClick={handleNameComplete}
+                      disabled={createOrderMutation.isPending}
                     >
-                      Tampilkan Pesanan
+                      {createOrderMutation.isPending ? "Menambahkan..." : "Tampilkan Pesanan"}
                     </Button>
                   </div>
                 )}
@@ -243,16 +246,24 @@ export default function AdminPage() {
                                   : OrderStatus.PREPARING,
                             })
                           }
+                          disabled={updateStatusMutation.isPending || deleteOrderMutation.isPending}
                         >
-                          {order.status === OrderStatus.PREPARING ? "Selesai" : "Masak Ulang"}
+                          {updateStatusMutation.isPending && updateStatusMutation.variables?.id === order.id
+                            ? "Memperbarui..."
+                            : order.status === OrderStatus.PREPARING
+                            ? "Selesai"
+                            : "Masak Ulang"}
                         </Button>
                         <Button
                           variant="outline"
                           className="rounded-xl border-neutral-200 bg-white py-6 text-neutral-800 hover:bg-red-500 hover:text-white"
                           onClick={() => deleteOrderMutation.mutate(order.id)}
+                          disabled={updateStatusMutation.isPending || deleteOrderMutation.isPending}
                         >
                           <TrashIcon className="mr-2 h-5 w-5" />
-                          Hapus
+                          {deleteOrderMutation.isPending && deleteOrderMutation.variables === order.id
+                            ? "Menghapus..."
+                            : "Hapus"}
                         </Button>
                       </div>
                     </TableCell>
