@@ -20,9 +20,9 @@ app.options('*', (c) => {
 
 // Configure CORS - more permissive configuration
 app.use(cors({
-  origin: '*',  // More permissive for testing
+  origin: process.env.FRONTEND_URL || '*',
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowHeaders: ['*'],  // Allow all headers
+  allowHeaders: ['*'],
   exposeHeaders: ['*'],
   credentials: true,
   maxAge: 3600,
