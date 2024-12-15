@@ -1,7 +1,4 @@
-FROM node:20-alpine AS base
-
-# Build stage
-FROM base AS builder
+FROM node:20-alpine AS builder
 WORKDIR /app
 
 # Install build dependencies
@@ -12,18 +9,12 @@ RUN npm ci
 COPY . .
 RUN npm run build
 
-# Runtime stage
-FROM base AS runner
-WORKDIR /app
+# Production stage with Nginx
+FROM nginx:alpine
+COPY --from=builder /app/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Install serve to run the production build
-RUN npm install -g serve
+# Expose port 80
+EXPOSE 80
 
-# Copy built artifacts from builder
-COPY --from=builder /app/dist ./dist
-
-# Expose the port Vite uses
-EXPOSE 5173
-
-# Start the application
-CMD ["serve", "-s", "dist", "-l", "5173"] 
+CMD ["nginx", "-g", "daemon off;"] 
