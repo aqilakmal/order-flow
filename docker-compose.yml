@@ -7,8 +7,13 @@ services:
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
-    env_file:
-      - ${ENV_FILE:-./backend/.env}
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - DATABASE_URL=${DATABASE_URL}
+      - PORT=${PORT}
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
     restart: unless-stopped
 
   frontend:
@@ -17,8 +22,8 @@ services:
       dockerfile: Dockerfile
     expose:
       - "80"
-    env_file:
-      - ${ENV_FILE:-./frontend/.env}
+    environment:
+      - VITE_API_URL=${VITE_API_URL}
     depends_on:
       - backend
     restart: unless-stopped 
