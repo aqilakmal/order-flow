@@ -17,8 +17,6 @@ function getAuthHeader(): HeadersInit {
   return {
     Authorization: `Bearer ${access_token}`,
     "Content-Type": "application/json",
-    mode: 'cors',
-    credentials: 'include',
   };
 }
 
@@ -41,6 +39,8 @@ export async function createOrder(data: Omit<OrderType, "id" | "createdAt" | "up
     method: "POST",
     headers: getAuthHeader(),
     body: JSON.stringify(validatedData),
+    mode: 'cors',
+    credentials: 'include',
   });
   const responseData = await response.json();
   return Order.parse(responseData);
@@ -51,6 +51,8 @@ export async function updateOrderStatus(id: string, status: OrderType["status"])
     method: "PATCH",
     headers: getAuthHeader(),
     body: JSON.stringify({ status }),
+    mode: 'cors',
+    credentials: 'include',
   });
   const data = await response.json();
   return Order.parse(data);
@@ -60,6 +62,8 @@ export async function deleteOrder(id: string) {
   const response = await fetch(`${API_URL}/orders/${id}`, {
     method: "DELETE",
     headers: getAuthHeader(),
+    mode: 'cors',
+    credentials: 'include',
   });
   return response.ok;
 }
