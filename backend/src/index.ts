@@ -6,12 +6,21 @@ import { orders } from "./lib/schema.js";
 import authRoutes from "./routes/auth.js";
 import orderRoutes from "./routes/orders.js";
 
+console.log('CORS configuration:', {
+  frontendUrl: process.env.FRONTEND_URL,
+  nodeEnv: process.env.NODE_ENV
+});
+
 const app = new Hono();
 
-// Configure CORS
+// Configure CORS - more explicit configuration
 app.use(cors({
   origin: process.env.FRONTEND_URL || '*',
+  allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowHeaders: ['Content-Type', 'Authorization'],
+  exposeHeaders: ['Content-Length', 'X-Requested-With'],
   credentials: true,
+  maxAge: 3600,
 }));
 
 // Mount routes
