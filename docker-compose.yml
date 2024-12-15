@@ -17,8 +17,8 @@ services:
       dockerfile: Dockerfile
     expose:
       - "80"
-    environment:
-      - VITE_API_URL=http://backend:3000
+    env_file:
+      - ${ENV_FILE:-./frontend/.env}
     depends_on:
       - backend
     restart: unless-stopped 
