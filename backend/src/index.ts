@@ -1,40 +1,27 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { z } from "zod";
-import { nanoid } from "nanoid";
 import { db } from "./lib/db.js";
 import { orders } from "./lib/schema.js";
-import { eq } from "drizzle-orm";
+import authRoutes from "./routes/auth.js";
+import orderRoutes from "./routes/orders.js";
 
 const app = new Hono();
-app.use(cors());
 
-const OrderStatus = {
-  PREPARING: "preparing",
-  COMPLETED: "completed",
-} as const;
+// Configure CORS
+app.use(cors({
+  origin: process.env.FRONTEND_URL || '*',
+  credentials: true,
+}));
 
-const orderSchema = z.object({
-  id: z.string(),
-  order_id: z.string(),
-  name: z.string(),
-  status: z.enum([OrderStatus.PREPARING, OrderStatus.COMPLETED]),
-  createdAt: z.string(),
-  updatedAt: z.string(),
-});
+// Mount routes
+app.route("/auth", authRoutes);
+app.route("/orders", orderRoutes);
 
-const createOrderSchema = orderSchema.omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-// Hello World
+// Public routes
 app.get("/", (c) => {
   return c.text("Hello World");
 });
 
-// Health check
 app.get("/health", async (c) => {
   try {
     await db.select().from(orders).limit(1);
@@ -51,111 +38,6 @@ app.get("/health", async (c) => {
       },
       500
     );
-  }
-});
-
-// Routes
-app.get("/orders", async (c) => {
-  try {
-    const data = await db.select().from(orders).orderBy(orders.updatedAt);
-    return c.json(
-      data.map((order) => ({
-        ...order,
-        createdAt: order.createdAt.toISOString(),
-        updatedAt: order.updatedAt.toISOString(),
-      }))
-    );
-  } catch (error) {
-    return c.json({ error: error instanceof Error ? error.message : "Unknown error" }, 500);
-  }
-});
-
-/**
- * Create an order
- *
- * @route POST /orders
- * @description Creates a new order in the system
- *
- * @requestBody {object} order
- * @property {string} number - The order number
- * @property {string} name - Customer name
- * @property {string} status - Order status (PREPARING or COMPLETED)
- *
- * @returns {object} Created order
- * @property {string} id - Unique order ID
- * @property {string} number - Order number
- * @property {string} name - Customer name
- * @property {string} status - Order status
- * @property {string} createdAt - Creation timestamp
- *
- * @throws {400} Invalid order data
- */
-app.post("/orders", async (c) => {
-  const body = await c.req.json();
-
-  try {
-    const validatedData = createOrderSchema.parse(body);
-    const now = new Date();
-    const newOrder = {
-      ...validatedData,
-      id: nanoid(),
-      createdAt: now,
-      updatedAt: now,
-    };
-
-    const [data] = await db.insert(orders).values(newOrder).returning();
-
-    return c.json({
-      ...data,
-      createdAt: data.createdAt,
-      updatedAt: data.updatedAt,
-    });
-  } catch (error) {
-    return c.json({ error: "Invalid order data" }, 400);
-  }
-});
-
-app.patch("/orders/:id", async (c) => {
-  const id = c.req.param("id");
-  const body = await c.req.json();
-
-  try {
-    const [data] = await db
-      .update(orders)
-      .set({
-        status: body.status,
-        updatedAt: new Date(),
-      })
-      .where(eq(orders.id, id))
-      .returning();
-
-    if (!data) {
-      return c.json({ error: "Order not found" }, 404);
-    }
-
-    return c.json({
-      ...data,
-      createdAt: data.createdAt,
-      updatedAt: data.updatedAt,
-    });
-  } catch (error) {
-    return c.json({ error: "Invalid status" }, 400);
-  }
-});
-
-app.delete("/orders/:id", async (c) => {
-  const id = c.req.param("id");
-
-  try {
-    const [deletedOrder] = await db.delete(orders).where(eq(orders.id, id)).returning();
-
-    if (!deletedOrder) {
-      return c.json({ error: "Order not found" }, 404);
-    }
-
-    return c.json({ success: true });
-  } catch (error) {
-    return c.json({ error: "Failed to delete order" }, 500);
   }
 });
 
