@@ -32,8 +32,23 @@ COPY --from=builder --chown=hono:nodejs /app/package.json ./package.json
 # Switch to non-root user
 USER hono
 
+# Add debug prints
+RUN echo "Backend Environment at build time:"
+RUN echo "PORT=${PORT}"
+
+# Add runtime debug script
+COPY --chown=hono:nodejs <<'EOF' /app/start.sh
+#!/bin/sh
+echo "Backend Environment at runtime:"
+echo "PORT=${PORT}"
+echo "Starting server..."
+exec node dist/server.js
+EOF
+
+RUN chmod +x /app/start.sh
+
 # Expose the port the app runs on
 EXPOSE 3000
 
-# Start the application
-CMD ["node", "dist/server.js"]
+# Start using our debug script
+CMD ["/app/start.sh"]
