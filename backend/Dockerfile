@@ -35,6 +35,7 @@ USER hono
 # Add debug prints
 RUN echo "Backend Environment at build time:"
 RUN echo "PORT=${PORT}"
+RUN echo "FRONTEND_URL=${FRONTEND_URL}"
 
 # Add runtime debug script
 COPY --chown=hono:nodejs <<'EOF' /app/start.sh
