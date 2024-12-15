@@ -2,8 +2,21 @@ import { Order, createOrderSchema, type Order as OrderType } from "../types/orde
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
+function getAuthHeader(): HeadersInit {
+  const session = localStorage.getItem("session");
+  if (!session) return {};
+  
+  const { access_token } = JSON.parse(session);
+  return {
+    Authorization: `Bearer ${access_token}`,
+    "Content-Type": "application/json",
+  };
+}
+
 export async function getOrders(): Promise<OrderType[]> {
-  const response = await fetch(`${API_URL}/orders`);
+  const response = await fetch(`${API_URL}/orders`, {
+    headers: getAuthHeader(),
+  });
   const data = await response.json();
   try {
     return data.map((order: unknown) => Order.parse(order));
@@ -17,9 +30,7 @@ export async function createOrder(data: Omit<OrderType, "id" | "createdAt" | "up
   const validatedData = createOrderSchema.parse(data);
   const response = await fetch(`${API_URL}/orders`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: getAuthHeader(),
     body: JSON.stringify(validatedData),
   });
   const responseData = await response.json();
@@ -29,9 +40,7 @@ export async function createOrder(data: Omit<OrderType, "id" | "createdAt" | "up
 export async function updateOrderStatus(id: string, status: OrderType["status"]) {
   const response = await fetch(`${API_URL}/orders/${id}`, {
     method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: getAuthHeader(),
     body: JSON.stringify({ status }),
   });
   const data = await response.json();
@@ -41,6 +50,7 @@ export async function updateOrderStatus(id: string, status: OrderType["status"])
 export async function deleteOrder(id: string) {
   const response = await fetch(`${API_URL}/orders/${id}`, {
     method: "DELETE",
+    headers: getAuthHeader(),
   });
   return response.ok;
 }
