@@ -12,19 +12,20 @@
   },
   "dependencies": {
     "@hono/node-server": "^1.13.7",
+    "@supabase/supabase-js": "^2.47.7",
     "dotenv": "^16.3.1",
+    "drizzle-orm": "^0.29.3",
     "hono": "^4.6.13",
     "nanoid": "^3.3.4",
-    "zod": "^3.22.4",
-    "drizzle-orm": "^0.29.3",
-    "postgres": "^3.4.3"
+    "postgres": "^3.4.3",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",
+    "drizzle-kit": "^0.20.14",
     "prettier": "^3.1.1",
     "tsx": "^4.7.0",
-    "typescript": "^5.7.2",
-    "drizzle-kit": "^0.20.14"
+    "typescript": "^5.7.2"
   },
   "type": "module"
 }
