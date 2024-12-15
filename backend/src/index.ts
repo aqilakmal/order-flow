@@ -22,7 +22,7 @@ app.options('*', (c) => {
 app.use(cors({
   origin: process.env.FRONTEND_URL || '*',
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowHeaders: ['*'],
+  allowHeaders: ['Content-Type', 'Authorization', 'Accept'],
   exposeHeaders: ['*'],
   credentials: true,
   maxAge: 3600,

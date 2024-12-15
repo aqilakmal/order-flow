@@ -66,4 +66,8 @@ auth.get("/validate", authMiddleware, async (c) => {
   return c.json({ user });
 });
 
+auth.options('/*', (c) => {
+  return c.text('', 204);
+});
+
 export default auth; 
