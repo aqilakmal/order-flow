@@ -13,13 +13,11 @@ console.log('CORS configuration:', {
 
 const app = new Hono();
 
-// Add OPTIONS handler for pre-flight requests
-app.options('*', (c) => {
-  return c.text('', 204);
-});
-
-// Configure CORS - more permissive configuration
-app.use(cors({
+/**
+ * Configure CORS
+ * Make sure cors() middleware is the first middleware in the chain
+ */
+app.use("*", cors({
   origin: process.env.FRONTEND_URL || '*',
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowHeaders: ['Content-Type', 'Authorization', 'Accept'],

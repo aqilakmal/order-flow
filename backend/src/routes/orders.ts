@@ -116,9 +116,4 @@ ordersRouter.delete("/:id", async (c) => {
   }
 });
 
-// Add OPTIONS handler for orders routes
-ordersRouter.options('/*', (c) => {
-  return c.text('', 204);
-});
-
 export default ordersRouter; 
