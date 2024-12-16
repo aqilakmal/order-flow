@@ -24,11 +24,11 @@ export function NumPad({ value, onChange, onEnter }: NumPadProps) {
       {buttons.map((button) => (
         <Button
           key={button}
-          className={`h-10 text-base text-neutral-900 border border-neutral-300 hover:bg-brand-100 active:bg-brand-200 sm:h-12 sm:text-lg ${
+          className={`h-10 border border-neutral-300 text-base text-neutral-900 hover:bg-brand-100 active:bg-brand-200 sm:h-12 sm:text-lg ${
             button === "enter"
               ? value.length === 3
                 ? "bg-brand-500 text-white hover:bg-brand-600 active:bg-brand-700"
-                : "cursor-not-allowed opacity-50 text-neutral-500"
+                : "cursor-not-allowed text-neutral-500 opacity-50"
               : "bg-white"
           }`}
           onClick={() => handleClick(button)}

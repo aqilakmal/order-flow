@@ -23,7 +23,7 @@ export default function DisplayPage() {
   const isStale = timeSinceLastUpdate > 30;
 
   const OrderCard = ({ order, variant }: { order: Order; variant: "preparing" | "completed" }) => (
-    <div 
+    <div
       className={`rounded-xl p-4 shadow-sm sm:p-6 ${
         variant === "preparing" ? "bg-brand-500" : "bg-green-500"
       }`}
@@ -35,10 +35,10 @@ export default function DisplayPage() {
             <span className="font-normal text-white/75">xxxx</span>
             <span>{order.order_id}</span>
           </div>
-          <div 
+          <div
             className={`rounded-full px-3 py-1 text-xs font-medium sm:px-4 sm:py-2 sm:text-base ${
-              variant === "preparing" 
-                ? "bg-brand-300 text-brand-950"
+              variant === "preparing"
+                ? "text-brand-950 bg-brand-300"
                 : "bg-green-300 text-green-950"
             }`}
           >
@@ -61,12 +61,18 @@ export default function DisplayPage() {
       {/* Mobile View (Tabs) */}
       <div className="flex-1 overflow-hidden sm:hidden">
         <div className="flex h-full flex-col p-3 pb-0">
-          <Tabs defaultValue="preparing" className="flex flex-col h-full">
+          <Tabs defaultValue="preparing" className="flex h-full flex-col">
             <TabsList className="flex w-full rounded-lg bg-white/80 backdrop-blur">
-              <TabsTrigger value="preparing" className="flex-1 data-[state=active]:bg-brand-500 data-[state=active]:text-white">
+              <TabsTrigger
+                value="preparing"
+                className="flex-1 data-[state=active]:bg-brand-500 data-[state=active]:text-white"
+              >
                 Dimasak ({preparingOrders.length})
               </TabsTrigger>
-              <TabsTrigger value="completed" className="flex-1 data-[state=active]:bg-green-500 data-[state=active]:text-white">
+              <TabsTrigger
+                value="completed"
+                className="flex-1 data-[state=active]:bg-green-500 data-[state=active]:text-white"
+              >
                 Selesai ({completedOrders.length})
               </TabsTrigger>
             </TabsList>
@@ -101,9 +107,9 @@ export default function DisplayPage() {
       </div>
 
       {/* Desktop/Tablet View (Split Screen) */}
-      <div className="hidden flex-1 sm:flex overflow-hidden">
+      <div className="hidden flex-1 overflow-hidden sm:flex">
         {/* Preparing Orders Column */}
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex flex-1 flex-col overflow-hidden">
           <div className="p-6 pb-4">
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-semibold text-brand-500">Sedang di Masak</h2>
@@ -128,7 +134,7 @@ export default function DisplayPage() {
         </div>
 
         {/* Completed Orders Column */}
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex flex-1 flex-col overflow-hidden">
           <div className="p-6 pb-4">
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-semibold text-green-600">Selesai</h2>
@@ -159,13 +165,17 @@ export default function DisplayPage() {
           <div className="flex-1">
             <h1 className="text-[10px] text-brand-100 sm:text-xs">Order Flow</h1>
           </div>
-          <div className={`flex items-center gap-1 sm:gap-2 ${isStale ? "text-red-500" : "text-green-500"}`}>
+          <div
+            className={`flex items-center gap-1 sm:gap-2 ${isStale ? "text-red-500" : "text-green-500"}`}
+          >
             <div
               className={`h-1 w-1 animate-pulse rounded-full sm:h-1.5 sm:w-1.5 ${
                 isStale ? "bg-red-500" : "bg-green-500"
               }`}
             />
-            <span className="text-[10px] sm:text-xs">{formatTimestamp(new Date(), dataUpdatedAt)}</span>
+            <span className="text-[10px] sm:text-xs">
+              {formatTimestamp(new Date(), dataUpdatedAt)}
+            </span>
           </div>
         </div>
       </div>

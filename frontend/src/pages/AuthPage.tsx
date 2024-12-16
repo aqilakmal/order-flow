@@ -37,26 +37,26 @@ export default function AuthPage() {
   };
 
   const handleEmailBlur = () => {
-    setErrors(prev => ({
+    setErrors((prev) => ({
       ...prev,
-      email: validateEmail(email)
+      email: validateEmail(email),
     }));
   };
 
   const handlePasswordBlur = () => {
-    setErrors(prev => ({
+    setErrors((prev) => ({
       ...prev,
-      password: validatePassword(password)
+      password: validatePassword(password),
     }));
   };
 
   const validateForm = () => {
     const emailError = validateEmail(email);
     const passwordError = validatePassword(password);
-    
+
     setErrors({
       email: emailError,
-      password: passwordError
+      password: passwordError,
     });
 
     return !emailError && !passwordError;
@@ -111,7 +111,7 @@ export default function AuthPage() {
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>, isSignIn: boolean) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       e.preventDefault();
       if (isSignIn) {
         handleSignIn();
@@ -125,15 +125,25 @@ export default function AuthPage() {
     <div className="relative h-screen overflow-hidden bg-[#FFDFB5]">
       <div className="container mx-auto flex h-screen items-center justify-center">
         <div className="w-full max-w-sm rounded-lg bg-white p-6 shadow-lg">
-          <div className="text-center mb-4">
+          <div className="mb-4 text-center">
             <h1 className="text-2xl font-bold text-brand-900">Order Flow</h1>
             <p className="mt-1 text-sm text-brand-700">Masuk untuk mengelola pesanan</p>
           </div>
 
           <Tabs defaultValue="signin" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin" className="data-[state=active]:bg-brand-500 data-[state=active]:text-white hover:bg-brand-200">Masuk</TabsTrigger>
-              <TabsTrigger value="signup" className="data-[state=active]:bg-brand-500 data-[state=active]:text-white hover:bg-brand-200">Daftar</TabsTrigger>
+              <TabsTrigger
+                value="signin"
+                className="hover:bg-brand-200 data-[state=active]:bg-brand-500 data-[state=active]:text-white"
+              >
+                Masuk
+              </TabsTrigger>
+              <TabsTrigger
+                value="signup"
+                className="hover:bg-brand-200 data-[state=active]:bg-brand-500 data-[state=active]:text-white"
+              >
+                Daftar
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="signin" className="space-y-3">
@@ -146,9 +156,9 @@ export default function AuthPage() {
                     onChange={(e) => setEmail(e.target.value)}
                     onBlur={handleEmailBlur}
                     onKeyDown={(e) => handleKeyDown(e, true)}
-                    className={`focus-visible:ring-brand-500 hover:border-brand-300 ${errors.email ? 'border-red-500' : ''}`}
+                    className={`hover:border-brand-300 focus-visible:ring-brand-500 ${errors.email ? "border-red-500" : ""}`}
                   />
-                  {errors.email && <p className="text-sm text-red-500 mt-1">{errors.email}</p>}
+                  {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
                 </div>
                 <div>
                   <Input
@@ -158,12 +168,14 @@ export default function AuthPage() {
                     onChange={(e) => setPassword(e.target.value)}
                     onBlur={handlePasswordBlur}
                     onKeyDown={(e) => handleKeyDown(e, true)}
-                    className={`focus-visible:ring-brand-500 hover:border-brand-300 ${errors.password ? 'border-red-500' : ''}`}
+                    className={`hover:border-brand-300 focus-visible:ring-brand-500 ${errors.password ? "border-red-500" : ""}`}
                   />
-                  {errors.password && <p className="text-sm text-red-500 mt-1">{errors.password}</p>}
+                  {errors.password && (
+                    <p className="mt-1 text-sm text-red-500">{errors.password}</p>
+                  )}
                 </div>
                 <Button
-                  className="w-full bg-brand-500 hover:bg-brand-600 text-white"
+                  className="w-full bg-brand-500 text-white hover:bg-brand-600"
                   onClick={handleSignIn}
                   disabled={signInMutation.isPending}
                 >
@@ -182,9 +194,9 @@ export default function AuthPage() {
                     onChange={(e) => setEmail(e.target.value)}
                     onBlur={handleEmailBlur}
                     onKeyDown={(e) => handleKeyDown(e, false)}
-                    className={`focus-visible:ring-brand-500 hover:border-brand-300 ${errors.email ? 'border-red-500' : ''}`}
+                    className={`hover:border-brand-300 focus-visible:ring-brand-500 ${errors.email ? "border-red-500" : ""}`}
                   />
-                  {errors.email && <p className="text-sm text-red-500 mt-1">{errors.email}</p>}
+                  {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
                 </div>
                 <div>
                   <Input
@@ -194,12 +206,14 @@ export default function AuthPage() {
                     onChange={(e) => setPassword(e.target.value)}
                     onBlur={handlePasswordBlur}
                     onKeyDown={(e) => handleKeyDown(e, false)}
-                    className={`focus-visible:ring-brand-500 hover:border-brand-300 ${errors.password ? 'border-red-500' : ''}`}
+                    className={`hover:border-brand-300 focus-visible:ring-brand-500 ${errors.password ? "border-red-500" : ""}`}
                   />
-                  {errors.password && <p className="text-sm text-red-500 mt-1">{errors.password}</p>}
+                  {errors.password && (
+                    <p className="mt-1 text-sm text-red-500">{errors.password}</p>
+                  )}
                 </div>
                 <Button
-                  className="w-full bg-brand-500 hover:bg-brand-600 text-white"
+                  className="w-full bg-brand-500 text-white hover:bg-brand-600"
                   onClick={handleSignUp}
                   disabled={signUpMutation.isPending}
                 >

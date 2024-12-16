@@ -1,4 +1,10 @@
-import { PlusIcon, TrashIcon, ArrowLeftStartOnRectangleIcon, CheckIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
+import {
+  PlusIcon,
+  TrashIcon,
+  ArrowLeftStartOnRectangleIcon,
+  CheckIcon,
+  ArrowPathIcon,
+} from "@heroicons/react/24/outline";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Button } from "../components/ui/button";
@@ -105,8 +111,8 @@ export default function AdminPage() {
 
   return (
     <div className="flex h-[100svh] flex-col bg-[#FFDFB5]">
-      <div className="flex flex-col flex-1 overflow-hidden">
-        <div className="p-3 sm:p-6 sm:pb-0 pb-0 max-w-5xl w-full mx-auto">
+      <div className="flex flex-1 flex-col overflow-hidden">
+        <div className="mx-auto w-full max-w-5xl p-3 pb-0 sm:p-6 sm:pb-0">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <h1 className="text-lg font-semibold text-brand-900 sm:text-xl">Manajemen Pesanan</h1>
             <div className="flex gap-2">
@@ -131,7 +137,7 @@ export default function AdminPage() {
           </div>
         </div>
 
-        <div className="flex-1 max-w-5xl w-full mx-auto overflow-y-auto p-3 pt-0 mt-3 sm:p-6 sm:pt-0">
+        <div className="mx-auto mt-3 w-full max-w-5xl flex-1 overflow-y-auto p-3 pt-0 sm:p-6 sm:pt-0">
           <div className="space-y-3 sm:space-y-4">
             {orders.length === 0 ? (
               <div className="rounded-lg bg-white p-8 text-center">
@@ -161,15 +167,18 @@ export default function AdminPage() {
                           {order.status === OrderStatus.PREPARING ? "Sedang Dimasak" : "Selesai"}
                         </span>
                       </div>
-                      <div className="text-xs text-brand-800 sm:text-sm font-semibold">{order.name}</div>
+                      <div className="text-xs font-semibold text-brand-800 sm:text-sm">
+                        {order.name}
+                      </div>
                       <div className="text-[10px] text-brand-800 sm:text-xs">
-                        <span className="hidden sm:inline">Updated At:</span> {formatTimestamp(order.updatedAt)}
+                        <span className="hidden sm:inline">Updated At:</span>{" "}
+                        {formatTimestamp(order.updatedAt)}
                       </div>
                     </div>
 
                     <div className="flex flex-col gap-2 sm:items-end">
                       <span
-                        className={`hidden sm:inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium sm:px-3 sm:py-1 sm:text-sm ${
+                        className={`hidden items-center rounded-full px-2 py-0.5 text-xs font-medium sm:inline-flex sm:px-3 sm:py-1 sm:text-sm ${
                           order.status === OrderStatus.PREPARING
                             ? "bg-brand-500 text-white"
                             : "bg-green-500 text-white"
@@ -177,7 +186,7 @@ export default function AdminPage() {
                       >
                         {order.status === OrderStatus.PREPARING ? "Sedang Dimasak" : "Selesai"}
                       </span>
-                      
+
                       <div className="flex w-full gap-2 sm:hidden">
                         <Button
                           variant="outline"
@@ -205,7 +214,8 @@ export default function AdminPage() {
                           }
                           disabled={updateStatusMutation.isPending || deleteOrderMutation.isPending}
                         >
-                          {updateStatusMutation.isPending && updateStatusMutation.variables?.id === order.id ? (
+                          {updateStatusMutation.isPending &&
+                          updateStatusMutation.variables?.id === order.id ? (
                             "..."
                           ) : order.status === OrderStatus.PREPARING ? (
                             <>
@@ -240,7 +250,8 @@ export default function AdminPage() {
                           }
                           disabled={updateStatusMutation.isPending || deleteOrderMutation.isPending}
                         >
-                          {updateStatusMutation.isPending && updateStatusMutation.variables?.id === order.id ? (
+                          {updateStatusMutation.isPending &&
+                          updateStatusMutation.variables?.id === order.id ? (
                             "..."
                           ) : order.status === OrderStatus.PREPARING ? (
                             <>
@@ -327,13 +338,17 @@ export default function AdminPage() {
           <div className="flex-1">
             <h1 className="text-[10px] text-brand-100 sm:text-xs">Order Flow</h1>
           </div>
-          <div className={`flex items-center gap-1 sm:gap-2 ${isStale ? "text-red-500" : "text-green-500"}`}>
+          <div
+            className={`flex items-center gap-1 sm:gap-2 ${isStale ? "text-red-500" : "text-green-500"}`}
+          >
             <div
               className={`h-1 w-1 animate-pulse rounded-full sm:h-1.5 sm:w-1.5 ${
                 isStale ? "bg-red-500" : "bg-green-500"
               }`}
             />
-            <span className="text-[10px] sm:text-xs">{formatTimestamp(new Date(), dataUpdatedAt)}</span>
+            <span className="text-[10px] sm:text-xs">
+              {formatTimestamp(new Date(), dataUpdatedAt)}
+            </span>
           </div>
         </div>
       </div>

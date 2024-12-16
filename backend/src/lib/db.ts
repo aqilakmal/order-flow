@@ -31,6 +31,6 @@ export const supabase = createClient(
 );
 
 // Test the Supabase connection
-supabase.auth.getSession().catch(error => {
+supabase.auth.getSession().catch((error) => {
   console.error("Failed to connect to Supabase:", error.message);
 });

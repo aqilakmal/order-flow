@@ -17,7 +17,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const savedSession = localStorage.getItem("session");
     const savedUser = localStorage.getItem("user");
-    
+
     if (savedSession && savedUser) {
       setSession(JSON.parse(savedSession));
       setUser(JSON.parse(savedUser));
@@ -49,4 +49,4 @@ export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) throw new Error("useAuth must be used within AuthProvider");
   return context;
-} 
+}

@@ -1,3 +1,0 @@
-current progress:
-- supabase running
-- postgres connection healthy in docker

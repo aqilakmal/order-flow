@@ -11,11 +11,11 @@ const queryClient = new QueryClient();
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, session } = useAuth();
-  
+
   if (!user || !session) {
     return <Navigate to="/auth" replace />;
   }
-  
+
   return children;
 }
 

@@ -30,9 +30,12 @@ auth.post("/signup", async (c) => {
       user: data.user,
     });
   } catch (error) {
-    return c.json({ 
-      error: error instanceof Error ? error.message : "Invalid registration data" 
-    }, 400);
+    return c.json(
+      {
+        error: error instanceof Error ? error.message : "Invalid registration data",
+      },
+      400
+    );
   }
 });
 
@@ -55,9 +58,12 @@ auth.post("/signin", async (c) => {
       user: data.user,
     });
   } catch (error) {
-    return c.json({ 
-      error: error instanceof Error ? error.message : "Invalid login credentials" 
-    }, 400);
+    return c.json(
+      {
+        error: error instanceof Error ? error.message : "Invalid login credentials",
+      },
+      400
+    );
   }
 });
 
@@ -66,4 +72,4 @@ auth.get("/validate", authMiddleware, async (c) => {
   return c.json({ user });
 });
 
-export default auth; 
+export default auth;

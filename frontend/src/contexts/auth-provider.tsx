@@ -12,15 +12,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     async function validateStoredSession() {
       const savedSession = localStorage.getItem("session");
       const savedUser = localStorage.getItem("user");
-      
+
       if (savedSession && savedUser) {
         try {
           const parsedSession = JSON.parse(savedSession);
           const parsedUser = JSON.parse(savedUser);
-          
+
           // Validate the session with the backend
           await validateSession(parsedSession.access_token);
-          
+
           setSession(parsedSession);
           setUser(parsedUser);
         } catch (error) {
@@ -58,4 +58,4 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       {children}
     </AuthContext.Provider>
   );
-} 
+}
