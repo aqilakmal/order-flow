@@ -1,4 +1,4 @@
-import { PlusIcon, TrashIcon, ArrowLeftStartOnRectangleIcon } from "@heroicons/react/24/outline";
+import { PlusIcon, TrashIcon, ArrowLeftStartOnRectangleIcon, CheckIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Button } from "../components/ui/button";
@@ -104,9 +104,9 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="flex min-h-[100svh] flex-col bg-[#FFDFB5]">
-      <div className="flex-1 overflow-y-auto">
-        <div className="container mx-auto space-y-3 p-3 sm:space-y-4 sm:p-6">
+    <div className="flex h-[100svh] flex-col bg-[#FFDFB5]">
+      <div className="flex flex-col flex-1 overflow-hidden">
+        <div className="p-3 sm:p-6 sm:pb-0 pb-0 max-w-5xl w-full mx-auto">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <h1 className="text-lg font-semibold text-brand-900 sm:text-xl">Manajemen Pesanan</h1>
             <div className="flex gap-2">
@@ -129,23 +129,47 @@ export default function AdminPage() {
               </Button>
             </div>
           </div>
+        </div>
 
+        <div className="flex-1 max-w-5xl w-full mx-auto overflow-y-auto p-3 pt-0 mt-3 sm:p-6 sm:pt-0">
           <div className="space-y-3 sm:space-y-4">
-            {orders.map((order) => (
-              <div
-                key={order.id}
-                className="rounded-lg bg-white p-3 shadow-sm transition-all hover:shadow-md sm:p-4"
-              >
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="space-y-1 sm:space-y-2">
-                    <div className="flex items-center justify-between sm:justify-start sm:gap-3">
-                      <div className="flex items-baseline text-lg font-bold tracking-tight text-brand-800 sm:text-xl">
-                        <span>F-</span>
-                        <span className="font-normal text-brand-300">xxxx</span>
-                        <span>{order.order_id}</span>
+            {orders.length === 0 ? (
+              <div className="rounded-lg bg-white p-8 text-center">
+                <p className="text-sm text-neutral-500 sm:text-base">Tidak ada pesanan</p>
+              </div>
+            ) : (
+              orders.map((order) => (
+                <div
+                  key={order.id}
+                  className="rounded-lg bg-white p-3 shadow-sm transition-all hover:shadow-md sm:p-4"
+                >
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="space-y-1 sm:space-y-2">
+                      <div className="flex items-center justify-between sm:justify-start sm:gap-3">
+                        <div className="flex items-baseline text-lg font-bold tracking-tight text-brand-800 sm:text-xl">
+                          <span>F-</span>
+                          <span className="font-normal text-brand-300">xxxx</span>
+                          <span>{order.order_id}</span>
+                        </div>
+                        <span
+                          className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium sm:hidden ${
+                            order.status === OrderStatus.PREPARING
+                              ? "bg-brand-500 text-white"
+                              : "bg-green-500 text-white"
+                          }`}
+                        >
+                          {order.status === OrderStatus.PREPARING ? "Sedang Dimasak" : "Selesai"}
+                        </span>
                       </div>
+                      <div className="text-xs text-brand-800 sm:text-sm font-semibold">{order.name}</div>
+                      <div className="text-[10px] text-brand-800 sm:text-xs">
+                        <span className="hidden sm:inline">Updated At:</span> {formatTimestamp(order.updatedAt)}
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-2 sm:items-end">
                       <span
-                        className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium sm:hidden ${
+                        className={`hidden sm:inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium sm:px-3 sm:py-1 sm:text-sm ${
                           order.status === OrderStatus.PREPARING
                             ? "bg-brand-500 text-white"
                             : "bg-green-500 text-white"
@@ -153,63 +177,98 @@ export default function AdminPage() {
                       >
                         {order.status === OrderStatus.PREPARING ? "Sedang Dimasak" : "Selesai"}
                       </span>
-                    </div>
-                    <div className="text-xs text-brand-800 sm:text-sm font-semibold">{order.name}</div>
-                    <div className="text-[10px] text-brand-800 sm:text-xs">
-                      <span className="hidden sm:inline">Updated At:</span> {formatTimestamp(order.updatedAt)}
-                    </div>
-                  </div>
+                      
+                      <div className="flex w-full gap-2 sm:hidden">
+                        <Button
+                          variant="outline"
+                          className="flex-1 px-2 text-xs hover:bg-red-500 hover:text-white"
+                          onClick={() => deleteOrderMutation.mutate(order.id)}
+                          disabled={updateStatusMutation.isPending || deleteOrderMutation.isPending}
+                        >
+                          <TrashIcon className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          className={`flex-1 gap-1 px-2 text-xs ${
+                            order.status === OrderStatus.PREPARING
+                              ? "bg-green-500 text-white hover:bg-green-600"
+                              : "bg-brand-100 text-brand-700 hover:bg-brand-200"
+                          }`}
+                          onClick={() =>
+                            updateStatusMutation.mutate({
+                              id: order.id,
+                              status:
+                                order.status === OrderStatus.PREPARING
+                                  ? OrderStatus.COMPLETED
+                                  : OrderStatus.PREPARING,
+                            })
+                          }
+                          disabled={updateStatusMutation.isPending || deleteOrderMutation.isPending}
+                        >
+                          {updateStatusMutation.isPending && updateStatusMutation.variables?.id === order.id ? (
+                            "..."
+                          ) : order.status === OrderStatus.PREPARING ? (
+                            <>
+                              <CheckIcon className="h-3 w-3" />
+                              <span>Selesai</span>
+                            </>
+                          ) : (
+                            <>
+                              <ArrowPathIcon className="h-3 w-3" />
+                              <span>Ulang</span>
+                            </>
+                          )}
+                        </Button>
+                      </div>
 
-                  <div className="flex flex-col gap-2 sm:items-end">
-                    <span
-                      className={`hidden sm:inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium sm:px-3 sm:py-1 sm:text-sm ${
-                        order.status === OrderStatus.PREPARING
-                          ? "bg-brand-500 text-white"
-                          : "bg-green-500 text-white"
-                      }`}
-                    >
-                      {order.status === OrderStatus.PREPARING ? "Sedang Dimasak" : "Selesai"}
-                    </span>
-                    
-                    <div className="flex w-full gap-2 sm:w-auto">
-                      <Button
-                        variant="outline"
-                        className={`flex-1 px-2 text-xs sm:px-4 sm:text-sm ${
-                          order.status === OrderStatus.PREPARING
-                            ? "bg-green-500 text-white hover:bg-green-600"
-                            : "bg-brand-100 text-brand-700 hover:bg-brand-200"
-                        }`}
-                        onClick={() =>
-                          updateStatusMutation.mutate({
-                            id: order.id,
-                            status:
-                              order.status === OrderStatus.PREPARING
-                                ? OrderStatus.COMPLETED
-                                : OrderStatus.PREPARING,
-                          })
-                        }
-                        disabled={updateStatusMutation.isPending || deleteOrderMutation.isPending}
-                      >
-                        {updateStatusMutation.isPending && updateStatusMutation.variables?.id === order.id
-                          ? "..."
-                          : order.status === OrderStatus.PREPARING
-                          ? "Selesai"
-                          : "Ulang"}
-                      </Button>
-                      <Button
-                        variant="outline"
-                        className="flex-1 px-2 text-xs hover:bg-red-500 hover:text-white sm:px-4 sm:text-sm"
-                        onClick={() => deleteOrderMutation.mutate(order.id)}
-                        disabled={updateStatusMutation.isPending || deleteOrderMutation.isPending}
-                      >
-                        <TrashIcon className="h-3 w-3 sm:h-4 sm:w-4" />
-                        <span className="hidden sm:inline ml-2">Hapus</span>
-                      </Button>
+                      <div className="hidden w-full gap-2 sm:flex sm:w-auto">
+                        <Button
+                          variant="outline"
+                          className={`flex-1 gap-2 px-2 text-xs sm:px-4 sm:text-sm ${
+                            order.status === OrderStatus.PREPARING
+                              ? "bg-green-500 text-white hover:bg-green-600"
+                              : "bg-brand-100 text-brand-700 hover:bg-brand-200"
+                          }`}
+                          onClick={() =>
+                            updateStatusMutation.mutate({
+                              id: order.id,
+                              status:
+                                order.status === OrderStatus.PREPARING
+                                  ? OrderStatus.COMPLETED
+                                  : OrderStatus.PREPARING,
+                            })
+                          }
+                          disabled={updateStatusMutation.isPending || deleteOrderMutation.isPending}
+                        >
+                          {updateStatusMutation.isPending && updateStatusMutation.variables?.id === order.id ? (
+                            "..."
+                          ) : order.status === OrderStatus.PREPARING ? (
+                            <>
+                              <CheckIcon className="h-4 w-4" />
+                              <span>Selesai</span>
+                            </>
+                          ) : (
+                            <>
+                              <ArrowPathIcon className="h-4 w-4" />
+                              <span>Ulang</span>
+                            </>
+                          )}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          className="flex-1 gap-2 px-2 text-xs hover:bg-red-500 hover:text-white sm:px-4 sm:text-sm"
+                          onClick={() => deleteOrderMutation.mutate(order.id)}
+                          disabled={updateStatusMutation.isPending || deleteOrderMutation.isPending}
+                        >
+                          <TrashIcon className="h-4 w-4" />
+                          <span>Hapus</span>
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </div>

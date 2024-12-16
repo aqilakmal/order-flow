@@ -57,48 +57,54 @@ export default function DisplayPage() {
   );
 
   return (
-    <div className="flex min-h-[100svh] flex-col bg-[#FFDFB5]">
+    <div className="flex h-[100svh] flex-col bg-[#FFDFB5]">
       {/* Mobile View (Tabs) */}
-      <div className="flex-1 sm:hidden">
-        <Tabs defaultValue="preparing" className="h-full">
-          <TabsList className="sticky top-0 z-10 flex w-full rounded-none bg-white/80 backdrop-blur">
-            <TabsTrigger value="preparing" className="flex-1 data-[state=active]:bg-brand-500 data-[state=active]:text-white">
-              Dimasak ({preparingOrders.length})
-            </TabsTrigger>
-            <TabsTrigger value="completed" className="flex-1 data-[state=active]:bg-green-500 data-[state=active]:text-white">
-              Selesai ({completedOrders.length})
-            </TabsTrigger>
-          </TabsList>
+      <div className="flex-1 overflow-hidden sm:hidden">
+        <div className="flex h-full flex-col p-3 pb-0">
+          <Tabs defaultValue="preparing" className="flex flex-col h-full">
+            <TabsList className="flex w-full rounded-lg bg-white/80 backdrop-blur">
+              <TabsTrigger value="preparing" className="flex-1 data-[state=active]:bg-brand-500 data-[state=active]:text-white">
+                Dimasak ({preparingOrders.length})
+              </TabsTrigger>
+              <TabsTrigger value="completed" className="flex-1 data-[state=active]:bg-green-500 data-[state=active]:text-white">
+                Selesai ({completedOrders.length})
+              </TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="preparing" className="h-[calc(100%-48px)] space-y-3 overflow-y-auto p-3">
-            {preparingOrders.map((order) => (
-              <OrderCard key={order.id} order={order} variant="preparing" />
-            ))}
-            {preparingOrders.length === 0 && (
-              <div className="py-12 text-center text-sm text-neutral-500">
-                Tidak ada pesanan yang sedang dimasak
+            <TabsContent value="preparing" className="flex-1 overflow-y-auto py-3 pt-2">
+              <div className="space-y-3">
+                {preparingOrders.map((order) => (
+                  <OrderCard key={order.id} order={order} variant="preparing" />
+                ))}
+                {preparingOrders.length === 0 && (
+                  <div className="py-12 text-center text-sm text-neutral-500">
+                    Tidak ada pesanan yang sedang dimasak
+                  </div>
+                )}
               </div>
-            )}
-          </TabsContent>
+            </TabsContent>
 
-          <TabsContent value="completed" className="h-[calc(100%-48px)] space-y-3 overflow-y-auto p-3">
-            {completedOrders.map((order) => (
-              <OrderCard key={order.id} order={order} variant="completed" />
-            ))}
-            {completedOrders.length === 0 && (
-              <div className="py-12 text-center text-sm text-neutral-500">
-                Tidak ada pesanan yang selesai
+            <TabsContent value="completed" className="flex-1 overflow-y-auto py-3 pt-2">
+              <div className="space-y-3">
+                {completedOrders.map((order) => (
+                  <OrderCard key={order.id} order={order} variant="completed" />
+                ))}
+                {completedOrders.length === 0 && (
+                  <div className="py-12 text-center text-sm text-neutral-500">
+                    Tidak ada pesanan yang selesai
+                  </div>
+                )}
               </div>
-            )}
-          </TabsContent>
-        </Tabs>
+            </TabsContent>
+          </Tabs>
+        </div>
       </div>
 
       {/* Desktop/Tablet View (Split Screen) */}
-      <div className="hidden flex-1 sm:grid sm:grid-cols-2 sm:gap-x-6 sm:overflow-hidden">
+      <div className="hidden flex-1 sm:flex overflow-hidden">
         {/* Preparing Orders Column */}
-        <div className="flex h-full flex-col overflow-hidden">
-          <div className="flex-none p-6 pb-4 pr-0">
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <div className="p-6 pb-4">
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-semibold text-brand-500">Sedang di Masak</h2>
               <span className="rounded-full bg-brand-500 px-4 py-1 text-lg text-white">
@@ -107,21 +113,23 @@ export default function DisplayPage() {
             </div>
           </div>
 
-          <div className="space-y-6 overflow-y-auto pb-6 pl-6">
-            {preparingOrders.map((order) => (
-              <OrderCard key={order.id} order={order} variant="preparing" />
-            ))}
-            {preparingOrders.length === 0 && (
-              <div className="py-12 text-center text-lg text-neutral-500">
-                Tidak ada pesanan yang sedang dimasak
-              </div>
-            )}
+          <div className="flex-1 overflow-y-auto px-6">
+            <div className="space-y-6 pb-6">
+              {preparingOrders.map((order) => (
+                <OrderCard key={order.id} order={order} variant="preparing" />
+              ))}
+              {preparingOrders.length === 0 && (
+                <div className="py-12 text-center text-lg text-neutral-500">
+                  Tidak ada pesanan yang sedang dimasak
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
         {/* Completed Orders Column */}
-        <div className="flex h-full flex-col overflow-hidden">
-          <div className="flex-none p-6 pb-4 pl-0">
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <div className="p-6 pb-4">
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-semibold text-green-600">Selesai</h2>
               <span className="rounded-full bg-green-500 px-4 py-1 text-lg text-white">
@@ -130,19 +138,22 @@ export default function DisplayPage() {
             </div>
           </div>
 
-          <div className="space-y-6 overflow-y-auto pb-6 pr-6">
-            {completedOrders.map((order) => (
-              <OrderCard key={order.id} order={order} variant="completed" />
-            ))}
-            {completedOrders.length === 0 && (
-              <div className="py-12 text-center text-lg text-neutral-500">
-                Tidak ada pesanan yang selesai
-              </div>
-            )}
+          <div className="flex-1 overflow-y-auto px-6">
+            <div className="space-y-6 pb-6">
+              {completedOrders.map((order) => (
+                <OrderCard key={order.id} order={order} variant="completed" />
+              ))}
+              {completedOrders.length === 0 && (
+                <div className="py-12 text-center text-lg text-neutral-500">
+                  Tidak ada pesanan yang selesai
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
 
+      {/* Footer - Always visible */}
       <div className="bg-neutral-800 px-3 py-1.5 sm:px-4 sm:py-2">
         <div className="mx-1 flex items-center justify-between sm:mx-2">
           <div className="flex-1">
