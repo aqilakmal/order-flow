@@ -274,7 +274,7 @@ export default function AdminPage() {
       </div>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="mx-3 max-w-[90%] rounded-lg p-3 sm:mx-auto sm:max-w-[400px] sm:rounded-xl sm:p-4">
+        <DialogContent className="max-w-[90%] rounded-lg p-3 sm:mx-auto sm:max-w-[400px] sm:rounded-xl sm:p-4">
           <DialogHeader>
             <DialogTitle className="text-center text-base font-semibold text-brand-900 sm:text-lg">
               {inputStep === "orderId" ? "Masukkan ID Pesanan" : "Masukkan Nama"}
