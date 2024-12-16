@@ -2,14 +2,6 @@ import { PlusIcon, TrashIcon, ArrowLeftStartOnRectangleIcon } from "@heroicons/r
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Button } from "../components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "../components/ui/table";
 import { useToast } from "../hooks/use-toast";
 import { createOrder, getOrders, updateOrderStatus, deleteOrder } from "../services/api";
 import { OrderStatus, type Order } from "../types/order";
@@ -112,179 +104,177 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="relative h-screen overflow-hidden bg-[#FFDFB5]">
-      <div className="h-[calc(100vh-2rem)] overflow-y-auto">
-        <div className="container mx-auto space-y-8 py-10">
-          <div className="flex items-center justify-between">
-            <h1 className="text-3xl font-semibold text-neutral-800">Manajemen Pesanan</h1>
+    <div className="flex min-h-[100svh] flex-col bg-[#FFDFB5]">
+      <div className="flex-1 overflow-y-auto">
+        <div className="container mx-auto space-y-3 p-3 sm:space-y-4 sm:p-6">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <h1 className="text-lg font-semibold text-brand-900 sm:text-xl">Manajemen Pesanan</h1>
             <div className="flex gap-2">
               <Button
                 onClick={handleLogout}
                 variant="outline"
-                className="gap-2 rounded-xl border-neutral-300 p-6 text-lg text-neutral-800 hover:bg-red-500 hover:text-white"
+                className="gap-1 px-2 text-xs hover:bg-red-500 hover:text-white sm:gap-2 sm:px-4 sm:text-sm"
                 disabled={createOrderMutation.isPending}
               >
-                <ArrowLeftStartOnRectangleIcon className="h-6 w-6" />
-                Keluar
+                <ArrowLeftStartOnRectangleIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Keluar</span>
               </Button>
               <Button
                 onClick={handleAddOrderClick}
-                className="gap-2 rounded-xl bg-neutral-800 p-6 text-lg text-white hover:bg-green-500"
+                className="gap-1 bg-brand-500 px-2 text-xs text-white hover:bg-brand-600 sm:gap-2 sm:px-4 sm:text-sm"
                 disabled={createOrderMutation.isPending}
               >
-                <PlusIcon className="h-6 w-6" />
-                {createOrderMutation.isPending ? "Menambahkan..." : "Tambah Pesanan"}
+                <PlusIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+                {createOrderMutation.isPending ? "..." : "Tambah"}
               </Button>
             </div>
           </div>
 
-          <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-            <DialogContent className="rounded-xl sm:max-w-[600px]">
-              <DialogHeader>
-                <DialogTitle className="text-center text-2xl">
-                  {inputStep === "orderId" ? "Masukkan ID Pesanan" : "Masukkan Nama Pelanggan"}
-                </DialogTitle>
-              </DialogHeader>
-
-              <div className="flex flex-col items-center gap-6 py-4">
-                <div className="w-full px-4">
-                  <input
-                    type="text"
-                    className="w-full rounded-xl bg-gray-100 p-4 text-center text-4xl leading-relaxed focus:outline-none"
-                    value={inputStep === "orderId" ? `F-xxxx${newOrder.order_id}` : newOrder.name}
-                    readOnly
-                    placeholder={inputStep === "orderId" ? "F-xxxx___" : "Nama Pelanggan"}
-                  />
-                </div>
-
-                {inputStep === "orderId" ? (
-                  <NumPad
-                    value={newOrder.order_id}
-                    onChange={(value) => setNewOrder({ ...newOrder, order_id: value })}
-                    onEnter={handleOrderIdComplete}
-                  />
-                ) : (
-                  <div className="w-full px-4">
-                    <input
-                      type="text"
-                      className="w-full rounded-xl border p-4 text-4xl leading-relaxed focus:outline-none"
-                      value={newOrder.name}
-                      onChange={(e) => setNewOrder({ ...newOrder, name: e.target.value })}
-                      onKeyDown={(e) => e.key === "Enter" && handleNameComplete()}
-                      autoFocus
-                      placeholder="Ketik nama pelanggan..."
-                    />
-                    <Button
-                      className="mt-4 h-16 w-full rounded-xl p-6 text-xl"
-                      onClick={handleNameComplete}
-                      disabled={createOrderMutation.isPending}
-                    >
-                      {createOrderMutation.isPending ? "Menambahkan..." : "Tampilkan Pesanan"}
-                    </Button>
+          <div className="space-y-3 sm:space-y-4">
+            {orders.map((order) => (
+              <div
+                key={order.id}
+                className="rounded-lg bg-white p-3 shadow-sm transition-all hover:shadow-md sm:p-4"
+              >
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="space-y-1 sm:space-y-2">
+                    <div className="flex items-center justify-between sm:justify-start sm:gap-3">
+                      <div className="flex items-baseline text-lg font-bold tracking-tight text-brand-800 sm:text-xl">
+                        <span>F-</span>
+                        <span className="font-normal text-brand-300">xxxx</span>
+                        <span>{order.order_id}</span>
+                      </div>
+                      <span
+                        className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium sm:hidden ${
+                          order.status === OrderStatus.PREPARING
+                            ? "bg-brand-500 text-white"
+                            : "bg-green-500 text-white"
+                        }`}
+                      >
+                        {order.status === OrderStatus.PREPARING ? "Sedang Dimasak" : "Selesai"}
+                      </span>
+                    </div>
+                    <div className="text-xs text-brand-800 sm:text-sm font-semibold">{order.name}</div>
+                    <div className="text-[10px] text-brand-800 sm:text-xs">
+                      <span className="hidden sm:inline">Updated At:</span> {formatTimestamp(order.updatedAt)}
+                    </div>
                   </div>
-                )}
-              </div>
-            </DialogContent>
-          </Dialog>
 
-          <div className="overflow-hidden rounded-xl border bg-white">
-            <Table>
-              <TableHeader className="bg-white">
-                <TableRow>
-                  <TableHead className="py-4 pl-6 text-lg text-neutral-600">Pesanan</TableHead>
-                  <TableHead className="text-lg text-neutral-600">Status</TableHead>
-                  <TableHead className="text-lg text-neutral-600">Aksi</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {orders.map((order) => (
-                  <TableRow key={order.id} className="hover:bg-white">
-                    <TableCell className="py-6 pl-6">
-                      <div className="space-y-2">
-                        <div className="flex items-baseline text-4xl font-bold tracking-tight text-neutral-800">
-                          <span>F-</span>
-                          <span className="font-normal text-neutral-400">xxxx</span>
-                          <span>{order.order_id}</span>
-                        </div>
-                        <div className="text-lg text-neutral-600">{order.name}</div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="py-4">
-                      <div className="space-y-3">
-                        <span
-                          className={`inline-flex items-center rounded-full px-4 py-2 text-sm font-medium ${
-                            order.status === OrderStatus.PREPARING
-                              ? "bg-brand-500 text-white"
-                              : "bg-green-500 text-white"
-                          }`}
-                        >
-                          {order.status === OrderStatus.PREPARING ? "Sedang di Masak" : "Selesai"}
-                        </span>
-                        <div className="text-sm text-neutral-500">
-                          <div className="flex items-center gap-1">
-                            <span>Diperbarui:</span>
-                            {formatTimestamp(order.updatedAt)}
-                          </div>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="py-4 pr-6">
-                      <div className="flex flex-col gap-2">
-                        <Button
-                          variant="outline"
-                          className={`rounded-xl px-6 py-6 text-base font-medium ${
-                            order.status === OrderStatus.PREPARING
-                              ? "bg-neutral-800 text-white hover:bg-green-500 hover:text-white"
-                              : "bg-neutral-100 text-neutral-800 hover:bg-brand-500 hover:text-white"
-                          }`}
-                          onClick={() =>
-                            updateStatusMutation.mutate({
-                              id: order.id,
-                              status:
-                                order.status === OrderStatus.PREPARING
-                                  ? OrderStatus.COMPLETED
-                                  : OrderStatus.PREPARING,
-                            })
-                          }
-                          disabled={updateStatusMutation.isPending || deleteOrderMutation.isPending}
-                        >
-                          {updateStatusMutation.isPending && updateStatusMutation.variables?.id === order.id
-                            ? "Memperbarui..."
-                            : order.status === OrderStatus.PREPARING
-                            ? "Selesai"
-                            : "Masak Ulang"}
-                        </Button>
-                        <Button
-                          variant="outline"
-                          className="rounded-xl border-neutral-200 bg-white py-6 text-neutral-800 hover:bg-red-500 hover:text-white"
-                          onClick={() => deleteOrderMutation.mutate(order.id)}
-                          disabled={updateStatusMutation.isPending || deleteOrderMutation.isPending}
-                        >
-                          <TrashIcon className="mr-2 h-5 w-5" />
-                          {deleteOrderMutation.isPending && deleteOrderMutation.variables === order.id
-                            ? "Menghapus..."
-                            : "Hapus"}
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                  <div className="flex flex-col gap-2 sm:items-end">
+                    <span
+                      className={`hidden sm:inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium sm:px-3 sm:py-1 sm:text-sm ${
+                        order.status === OrderStatus.PREPARING
+                          ? "bg-brand-500 text-white"
+                          : "bg-green-500 text-white"
+                      }`}
+                    >
+                      {order.status === OrderStatus.PREPARING ? "Sedang Dimasak" : "Selesai"}
+                    </span>
+                    
+                    <div className="flex w-full gap-2 sm:w-auto">
+                      <Button
+                        variant="outline"
+                        className={`flex-1 px-2 text-xs sm:px-4 sm:text-sm ${
+                          order.status === OrderStatus.PREPARING
+                            ? "bg-green-500 text-white hover:bg-green-600"
+                            : "bg-brand-100 text-brand-700 hover:bg-brand-200"
+                        }`}
+                        onClick={() =>
+                          updateStatusMutation.mutate({
+                            id: order.id,
+                            status:
+                              order.status === OrderStatus.PREPARING
+                                ? OrderStatus.COMPLETED
+                                : OrderStatus.PREPARING,
+                          })
+                        }
+                        disabled={updateStatusMutation.isPending || deleteOrderMutation.isPending}
+                      >
+                        {updateStatusMutation.isPending && updateStatusMutation.variables?.id === order.id
+                          ? "..."
+                          : order.status === OrderStatus.PREPARING
+                          ? "Selesai"
+                          : "Ulang"}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="flex-1 px-2 text-xs hover:bg-red-500 hover:text-white sm:px-4 sm:text-sm"
+                        onClick={() => deleteOrderMutation.mutate(order.id)}
+                        disabled={updateStatusMutation.isPending || deleteOrderMutation.isPending}
+                      >
+                        <TrashIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+                        <span className="hidden sm:inline ml-2">Hapus</span>
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 z-10 bg-neutral-800 px-4 py-2">
-        <div className="mx-2 flex items-center justify-between">
-          <div className="flex-1">
-            <h1 className="text-sm text-neutral-200">Order Flow</h1>
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="mx-3 max-w-[90%] rounded-lg p-3 sm:mx-auto sm:max-w-[400px] sm:rounded-xl sm:p-4">
+          <DialogHeader>
+            <DialogTitle className="text-center text-base font-semibold text-brand-900 sm:text-lg">
+              {inputStep === "orderId" ? "Masukkan ID Pesanan" : "Masukkan Nama"}
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="flex flex-col items-center gap-3 py-2 sm:gap-4 sm:py-3">
+            <div className="w-full px-2">
+              <input
+                type="text"
+                className="w-full rounded-lg bg-gray-50 p-2 text-center text-xl leading-relaxed focus:outline-none focus:ring-1 focus:ring-brand-500 sm:p-3"
+                value={inputStep === "orderId" ? `F-xxxx${newOrder.order_id}` : newOrder.name}
+                readOnly
+                placeholder={inputStep === "orderId" ? "F-xxxx___" : "Nama Pelanggan"}
+              />
+            </div>
+
+            {inputStep === "orderId" ? (
+              <NumPad
+                value={newOrder.order_id}
+                onChange={(value) => setNewOrder({ ...newOrder, order_id: value })}
+                onEnter={handleOrderIdComplete}
+              />
+            ) : (
+              <div className="w-full px-2">
+                <input
+                  type="text"
+                  className="w-full rounded-lg border border-gray-200 p-2 text-lg leading-relaxed focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 sm:p-3 sm:text-xl"
+                  value={newOrder.name}
+                  onChange={(e) => setNewOrder({ ...newOrder, name: e.target.value })}
+                  onKeyDown={(e) => e.key === "Enter" && handleNameComplete()}
+                  autoFocus
+                  placeholder="Ketik nama..."
+                />
+                <Button
+                  className="mt-2 h-10 w-full rounded-lg bg-brand-500 text-sm text-white hover:bg-brand-600 active:bg-brand-700 sm:h-12 sm:text-base"
+                  onClick={handleNameComplete}
+                  disabled={createOrderMutation.isPending}
+                >
+                  {createOrderMutation.isPending ? "..." : "Tampilkan"}
+                </Button>
+              </div>
+            )}
           </div>
-          <div className={`flex items-center gap-2 ${isStale ? "text-red-500" : "text-green-500"}`}>
+        </DialogContent>
+      </Dialog>
+
+      <div className="bg-neutral-800 px-3 py-1.5 sm:px-4 sm:py-2">
+        <div className="mx-1 flex items-center justify-between sm:mx-2">
+          <div className="flex-1">
+            <h1 className="text-[10px] text-brand-100 sm:text-xs">Order Flow</h1>
+          </div>
+          <div className={`flex items-center gap-1 sm:gap-2 ${isStale ? "text-red-500" : "text-green-500"}`}>
             <div
-              className={`h-2 w-2 animate-pulse rounded-full ${isStale ? "bg-red-500" : "bg-green-500"}`}
+              className={`h-1 w-1 animate-pulse rounded-full sm:h-1.5 sm:w-1.5 ${
+                isStale ? "bg-red-500" : "bg-green-500"
+              }`}
             />
-            <span className="text-sm">{formatTimestamp(new Date(), dataUpdatedAt)}</span>
+            <span className="text-[10px] sm:text-xs">{formatTimestamp(new Date(), dataUpdatedAt)}</span>
           </div>
         </div>
       </div>

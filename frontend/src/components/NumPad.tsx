@@ -20,21 +20,21 @@ export function NumPad({ value, onChange, onEnter }: NumPadProps) {
   };
 
   return (
-    <div className="mx-auto grid w-full grid-cols-3 gap-3 px-4">
+    <div className="mx-auto grid w-full grid-cols-3 gap-1.5 px-2 sm:gap-2">
       {buttons.map((button) => (
         <Button
           key={button}
-          className={`h-16 text-2xl leading-none ${
+          className={`h-10 text-base text-neutral-900 border border-neutral-300 hover:bg-brand-100 active:bg-brand-200 sm:h-12 sm:text-lg ${
             button === "enter"
               ? value.length === 3
-                ? "bg-green-600 hover:bg-green-700"
-                : "cursor-not-allowed opacity-50"
-              : ""
+                ? "bg-brand-500 text-white hover:bg-brand-600 active:bg-brand-700"
+                : "cursor-not-allowed opacity-50 text-neutral-500"
+              : "bg-white"
           }`}
           onClick={() => handleClick(button)}
           disabled={button === "enter" && value.length !== 3}
         >
-          {button === "enter" ? <span className="leading-none">Enter</span> : button}
+          {button === "enter" ? "OK" : button}
         </Button>
       ))}
     </div>
