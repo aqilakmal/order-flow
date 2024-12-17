@@ -1,10 +1,11 @@
 import "dotenv/config";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { db } from "./lib/db.js";
-import { orders } from "./lib/schema.js";
+import { db } from "./db/index.js";
+import { ordersTable } from "./db/schema.js";
 import authRoutes from "./routes/auth.js";
 import orderRoutes from "./routes/orders.js";
+import storesRouter from "./routes/stores.js";
 
 console.log("CORS configuration:", {
   frontendUrl: process.env.FRONTEND_URL,
@@ -31,6 +32,7 @@ app.use(
 
 // Mount routes
 app.route("/auth", authRoutes);
+app.route("/stores", storesRouter);
 app.route("/orders", orderRoutes);
 
 // Public routes
@@ -40,7 +42,7 @@ app.get("/", (c) => {
 
 app.get("/health", async (c) => {
   try {
-    await db.select().from(orders).limit(1);
+    await db.select().from(ordersTable).limit(1);
     return c.json({
       status: "healthy",
       message: "Database connection is working",
