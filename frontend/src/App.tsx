@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import AdminPage from "./pages/AdminPage";
+import StoresPage from "./pages/StoresPage";
 import DisplayPage from "./pages/DisplayPage";
 import AuthPage from "./pages/AuthPage";
 import { Toaster } from "./components/toaster";
@@ -31,11 +32,20 @@ function App() {
                 path="/admin"
                 element={
                   <ProtectedRoute>
+                    <StoresPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/:storeId"
+                element={
+                  <ProtectedRoute>
                     <AdminPage />
                   </ProtectedRoute>
                 }
               />
-              <Route path="/" element={<DisplayPage />} />
+              <Route path="/:storeId" element={<DisplayPage />} />
+              <Route path="/" element={<Navigate to="/auth" replace />} />
             </Routes>
           </Router>
         </div>
