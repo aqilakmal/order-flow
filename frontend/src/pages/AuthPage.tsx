@@ -1,6 +1,9 @@
-import { useState, KeyboardEvent } from "react";
+import { KeyboardEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -8,62 +11,29 @@ import { useToast } from "../hooks/use-toast";
 import { signIn, signUp } from "../services/auth";
 import { useAuth } from "../hooks/use-auth";
 
+// Form validation schema
+const authSchema = z.object({
+  email: z.string().email("Format email tidak valid").min(1, "Email wajib diisi"),
+  password: z.string().min(6, "Kata sandi minimal 6 karakter").min(1, "Kata sandi wajib diisi"),
+});
+
+type AuthFormValues = z.infer<typeof authSchema>;
+
 export default function AuthPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [errors, setErrors] = useState({ email: "", password: "" });
   const { toast } = useToast();
   const navigate = useNavigate();
   const { setAuth } = useAuth();
 
-  const validateEmail = (email: string) => {
-    if (!email) {
-      return "Email wajib diisi";
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return "Format email tidak valid";
-    }
-    return "";
-  };
-
-  const validatePassword = (password: string) => {
-    if (!password) {
-      return "Kata sandi wajib diisi";
-    }
-    if (password.length < 6) {
-      return "Kata sandi minimal 6 karakter";
-    }
-    return "";
-  };
-
-  const handleEmailBlur = () => {
-    setErrors((prev) => ({
-      ...prev,
-      email: validateEmail(email),
-    }));
-  };
-
-  const handlePasswordBlur = () => {
-    setErrors((prev) => ({
-      ...prev,
-      password: validatePassword(password),
-    }));
-  };
-
-  const validateForm = () => {
-    const emailError = validateEmail(email);
-    const passwordError = validatePassword(password);
-
-    setErrors({
-      email: emailError,
-      password: passwordError,
-    });
-
-    return !emailError && !passwordError;
-  };
+  const form = useForm<AuthFormValues>({
+    resolver: zodResolver(authSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
 
   const signInMutation = useMutation({
-    mutationFn: () => signIn(email, password),
+    mutationFn: (data: AuthFormValues) => signIn(data.email, data.password),
     onSuccess: (data) => {
       setAuth(data.user, data.session);
       navigate("/admin");
@@ -82,12 +52,13 @@ export default function AuthPage() {
   });
 
   const signUpMutation = useMutation({
-    mutationFn: () => signUp(email, password),
+    mutationFn: (data: AuthFormValues) => signUp(data.email, data.password),
     onSuccess: () => {
       toast({
         title: "Akun telah dibuat",
         description: "Silakan masuk dengan akun baru Anda.",
       });
+      form.reset();
     },
     onError: (error: Error) => {
       toast({
@@ -98,26 +69,18 @@ export default function AuthPage() {
     },
   });
 
-  const handleSignIn = () => {
-    if (validateForm()) {
-      signInMutation.mutate();
-    }
-  };
-
-  const handleSignUp = () => {
-    if (validateForm()) {
-      signUpMutation.mutate();
+  const onSubmit = (data: AuthFormValues, isSignIn: boolean) => {
+    if (isSignIn) {
+      signInMutation.mutate(data);
+    } else {
+      signUpMutation.mutate(data);
     }
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>, isSignIn: boolean) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      if (isSignIn) {
-        handleSignIn();
-      } else {
-        handleSignUp();
-      }
+      form.handleSubmit((data) => onSubmit(data, isSignIn))();
     }
   };
 
@@ -147,79 +110,97 @@ export default function AuthPage() {
             </TabsList>
 
             <TabsContent value="signin" className="space-y-3">
-              <div className="space-y-3">
+              <form
+                onSubmit={form.handleSubmit((data) => onSubmit(data, true))}
+                className="space-y-3"
+              >
                 <div>
                   <Input
                     type="email"
                     placeholder="Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    onBlur={handleEmailBlur}
+                    {...form.register("email")}
                     onKeyDown={(e) => handleKeyDown(e, true)}
-                    className={`hover:border-brand-300 focus-visible:ring-brand-500 ${errors.email ? "border-red-500" : ""}`}
+                    className={`hover:border-brand-300 focus-visible:ring-brand-500 ${
+                      form.formState.errors.email ? "border-red-500" : ""
+                    }`}
                   />
-                  {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
+                  {form.formState.errors.email && (
+                    <p className="mt-1 text-sm text-red-500">
+                      {form.formState.errors.email.message}
+                    </p>
+                  )}
                 </div>
                 <div>
                   <Input
                     type="password"
                     placeholder="Kata Sandi"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    onBlur={handlePasswordBlur}
+                    {...form.register("password")}
                     onKeyDown={(e) => handleKeyDown(e, true)}
-                    className={`hover:border-brand-300 focus-visible:ring-brand-500 ${errors.password ? "border-red-500" : ""}`}
+                    className={`hover:border-brand-300 focus-visible:ring-brand-500 ${
+                      form.formState.errors.password ? "border-red-500" : ""
+                    }`}
                   />
-                  {errors.password && (
-                    <p className="mt-1 text-sm text-red-500">{errors.password}</p>
+                  {form.formState.errors.password && (
+                    <p className="mt-1 text-sm text-red-500">
+                      {form.formState.errors.password.message}
+                    </p>
                   )}
                 </div>
                 <Button
+                  type="submit"
                   className="w-full bg-brand-500 text-white hover:bg-brand-600"
-                  onClick={handleSignIn}
                   disabled={signInMutation.isPending}
                 >
                   {signInMutation.isPending ? "Sedang masuk..." : "Masuk"}
                 </Button>
-              </div>
+              </form>
             </TabsContent>
 
             <TabsContent value="signup" className="space-y-3">
-              <div className="space-y-3">
+              <form
+                onSubmit={form.handleSubmit((data) => onSubmit(data, false))}
+                className="space-y-3"
+              >
                 <div>
                   <Input
                     type="email"
                     placeholder="Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    onBlur={handleEmailBlur}
+                    {...form.register("email")}
                     onKeyDown={(e) => handleKeyDown(e, false)}
-                    className={`hover:border-brand-300 focus-visible:ring-brand-500 ${errors.email ? "border-red-500" : ""}`}
+                    className={`hover:border-brand-300 focus-visible:ring-brand-500 ${
+                      form.formState.errors.email ? "border-red-500" : ""
+                    }`}
                   />
-                  {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
+                  {form.formState.errors.email && (
+                    <p className="mt-1 text-sm text-red-500">
+                      {form.formState.errors.email.message}
+                    </p>
+                  )}
                 </div>
                 <div>
                   <Input
                     type="password"
                     placeholder="Kata Sandi"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    onBlur={handlePasswordBlur}
+                    {...form.register("password")}
                     onKeyDown={(e) => handleKeyDown(e, false)}
-                    className={`hover:border-brand-300 focus-visible:ring-brand-500 ${errors.password ? "border-red-500" : ""}`}
+                    className={`hover:border-brand-300 focus-visible:ring-brand-500 ${
+                      form.formState.errors.password ? "border-red-500" : ""
+                    }`}
                   />
-                  {errors.password && (
-                    <p className="mt-1 text-sm text-red-500">{errors.password}</p>
+                  {form.formState.errors.password && (
+                    <p className="mt-1 text-sm text-red-500">
+                      {form.formState.errors.password.message}
+                    </p>
                   )}
                 </div>
                 <Button
+                  type="submit"
                   className="w-full bg-brand-500 text-white hover:bg-brand-600"
-                  onClick={handleSignUp}
                   disabled={signUpMutation.isPending}
                 >
                   {signUpMutation.isPending ? "Membuat akun..." : "Daftar"}
                 </Button>
-              </div>
+              </form>
             </TabsContent>
           </Tabs>
         </div>
