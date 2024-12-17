@@ -1,4 +1,4 @@
-import { PlusIcon, TrashIcon, PencilIcon } from "@heroicons/react/24/outline";
+import { PlusIcon, TrashIcon, PencilIcon, ArrowLeftStartOnRectangleIcon } from "@heroicons/react/24/outline";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -11,6 +11,7 @@ import type { CreateStore, Store } from "../types";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createStoreSchema } from "../types";
+import { useAuth } from "../hooks/use-auth";
 
 export default function StoresPage() {
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
@@ -18,6 +19,7 @@ export default function StoresPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const { clearAuth } = useAuth();
 
   const form = useForm<CreateStore>({
     resolver: zodResolver(createStoreSchema),
@@ -93,19 +95,34 @@ export default function StoresPage() {
     setIsModalOpen(true);
   };
 
+  const handleLogout = () => {
+    clearAuth();
+    // The ProtectedRoute component will automatically redirect to /auth
+  };
+
   return (
     <div className="flex h-[100svh] flex-col bg-[#FFDFB5]">
       <div className="flex-1 overflow-hidden">
         <div className="mx-auto w-full max-w-5xl p-3 sm:p-6">
           <div className="mb-6 flex items-center justify-between">
             <h1 className="text-xl font-semibold text-brand-900 sm:text-2xl">Daftar Toko</h1>
-            <Button
-              onClick={handleAdd}
-              className="gap-2 bg-brand-500 px-4 text-white hover:bg-brand-600"
-            >
-              <PlusIcon className="h-4 w-4" />
-              Tambah Toko
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                onClick={handleLogout}
+                variant="outline"
+                className="gap-2 px-2 text-sm hover:bg-red-500 hover:text-white sm:px-4"
+              >
+                <ArrowLeftStartOnRectangleIcon className="h-4 w-4 stroke-[2]" />
+                <span className="hidden sm:inline">Keluar</span>
+              </Button>
+              <Button
+                onClick={handleAdd}
+                className="gap-2 bg-brand-500 px-4 text-sm text-white hover:bg-brand-600"
+              >
+                <PlusIcon className="h-4 w-4 stroke-[2]" />
+                <span>Tambah</span>
+              </Button>
+            </div>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

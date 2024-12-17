@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import AdminPage from "./pages/AdminPage";
+import OrdersPage from "./pages/OrdersPage";
 import StoresPage from "./pages/StoresPage";
 import DisplayPage from "./pages/DisplayPage";
 import AuthPage from "./pages/AuthPage";
@@ -40,7 +40,7 @@ function App() {
                 path="/admin/:storeId"
                 element={
                   <ProtectedRoute>
-                    <AdminPage />
+                    <OrdersPage />
                   </ProtectedRoute>
                 }
               />

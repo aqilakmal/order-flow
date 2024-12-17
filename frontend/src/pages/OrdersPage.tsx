@@ -1,7 +1,6 @@
 import {
   PlusIcon,
   TrashIcon,
-  ArrowLeftStartOnRectangleIcon,
   CheckIcon,
   ArrowPathIcon,
   ArrowLeftIcon,
@@ -16,7 +15,6 @@ import { OrderStatus, type Order } from "../types";
 import { formatTimestamp } from "../lib/utils";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../components/ui/dialog";
 import { NumPad } from "../components/NumPad";
-import { useAuth } from "../hooks/use-auth";
 
 type UpdateOrderStatusParams = {
   storeId: string;
@@ -29,7 +27,7 @@ type DeleteOrderParams = {
   id: string;
 };
 
-export default function AdminPage() {
+export default function OrdersPage() {
   const { storeId } = useParams<{ storeId: string }>();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [inputStep, setInputStep] = useState<"orderId" | "name">("orderId");
@@ -39,7 +37,6 @@ export default function AdminPage() {
   });
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { clearAuth } = useAuth();
   const navigate = useNavigate();
 
   const { data: orders = [], dataUpdatedAt } = useQuery({
@@ -114,11 +111,6 @@ export default function AdminPage() {
   const timeSinceLastUpdate = Math.floor((Date.now() - dataUpdatedAt) / 1000);
   const isStale = timeSinceLastUpdate > 30;
 
-  const handleLogout = () => {
-    clearAuth();
-    // The ProtectedRoute component will automatically redirect to /auth
-  };
-
   return (
     <div className="flex h-[100svh] flex-col bg-[#FFDFB5]">
       <div className="flex flex-1 flex-col overflow-hidden">
@@ -134,29 +126,20 @@ export default function AdminPage() {
               </Button>
               <h1 className="text-lg font-semibold text-brand-900 sm:text-xl">Pesanan</h1>
             </div>
-            <div className="flex gap-2">
-              <Button
-                onClick={handleLogout}
-                variant="outline"
-                className="gap-2 px-2 text-sm hover:bg-red-500 hover:text-white sm:px-4"
-                disabled={createOrderMutation.isPending}
-              >
-                <ArrowLeftStartOnRectangleIcon className="h-4 w-4 stroke-[2]" />
-                <span className="hidden sm:inline">Keluar</span>
-              </Button>
-              <Button
-                onClick={handleAddOrderClick}
-                className="gap-2 bg-brand-500 px-4 text-sm text-white hover:bg-brand-600"
-                disabled={createOrderMutation.isPending}
-              >
-                <PlusIcon className="h-4 w-4 stroke-[2]" />
-                {createOrderMutation.isPending ? (
-                  "..."
-                ) : (
-                  <span className="hidden sm:inline">Tambah</span>
-                )}
-              </Button>
-            </div>
+            <Button
+              onClick={handleAddOrderClick}
+              className="gap-2 bg-brand-500 px-4 text-sm text-white hover:bg-brand-600"
+              disabled={createOrderMutation.isPending}
+            >
+              <PlusIcon className="h-4 w-4 stroke-[2]" />
+              {createOrderMutation.isPending ? (
+                "..."
+              ) : (
+                <>
+                  Tambah <span className="hidden sm:inline">Pesanan</span>
+                </>
+              )}
+            </Button>
           </div>
         </div>
 
