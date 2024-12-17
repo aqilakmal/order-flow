@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { z } from "zod";
-import { supabase } from "../lib/db.js";
-import { authMiddleware } from "../lib/middleware.js";
+import { supabase } from "../db/index.js";
+import { authMiddleware } from "../middleware.js";
 
 const auth = new Hono();
 

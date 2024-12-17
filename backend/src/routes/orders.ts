@@ -1,37 +1,42 @@
 import { Hono } from "hono";
-import { z } from "zod";
 import { nanoid } from "nanoid";
-import { db } from "../lib/db.js";
-import { orders } from "../lib/schema.js";
-import { eq } from "drizzle-orm";
-import { authMiddleware } from "../lib/middleware.js";
+import { db } from "../db/index.js";
+import {
+  ordersTable,
+  storesTable,
+  createOrderSchema,
+  updateOrderSchema,
+  type CreateOrder,
+  type UpdateOrder,
+} from "../db/schema.js";
+import { eq, and } from "drizzle-orm";
+import { authMiddleware } from "../middleware.js";
+import type { StatusCode } from "hono/utils/http-status";
 
 const ordersRouter = new Hono();
 
-const OrderStatus = {
-  PREPARING: "preparing",
-  COMPLETED: "completed",
-} as const;
-
-const orderSchema = z.object({
-  id: z.string(),
-  order_id: z.string(),
-  name: z.string(),
-  status: z.enum([OrderStatus.PREPARING, OrderStatus.COMPLETED]),
-  createdAt: z.string(),
-  updatedAt: z.string(),
-});
-
-const createOrderSchema = orderSchema.omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-// Get all orders - public endpoint
-ordersRouter.get("/", async (c) => {
+// Get all orders for a store - public endpoint
+ordersRouter.get("/:storeId", async (c) => {
   try {
-    const data = await db.select().from(orders).orderBy(orders.updatedAt);
+    const storeId = c.req.param("storeId");
+
+    // First get the store
+    const store = await db
+      .select()
+      .from(storesTable)
+      .where(eq(storesTable.storeId, storeId))
+      .limit(1);
+
+    if (!store.length) {
+      return c.json({ error: "Store not found" }, 404);
+    }
+
+    const data = await db
+      .select()
+      .from(ordersTable)
+      .where(eq(ordersTable.storeId, store[0].id))
+      .orderBy(ordersTable.updatedAt);
+
     return c.json(
       data.map((order) => ({
         ...order,
@@ -40,6 +45,7 @@ ordersRouter.get("/", async (c) => {
       }))
     );
   } catch (error) {
+    console.error("[orders/GET]: ", error);
     return c.json({ error: error instanceof Error ? error.message : "Unknown error" }, 500);
   }
 });
@@ -47,43 +53,83 @@ ordersRouter.get("/", async (c) => {
 // Apply auth middleware to all other order routes
 ordersRouter.use("/*", authMiddleware);
 
-ordersRouter.post("/", async (c) => {
-  const body = await c.req.json();
+// Helper function to check store ownership
+async function checkStoreOwnership(storeId: string, userId: string) {
+  const store = await db
+    .select()
+    .from(storesTable)
+    .where(eq(storesTable.storeId, storeId))
+    .limit(1);
 
+  if (!store.length) {
+    return { error: "Store not found", status: 404 };
+  }
+
+  if (store[0].ownerId !== userId) {
+    return { error: "Unauthorized", status: 403 };
+  }
+
+  return { store: store[0] };
+}
+
+// Create order for a store
+ordersRouter.post("/:storeId", async (c) => {
   try {
-    const validatedData = createOrderSchema.parse(body);
+    const user = c.get("user");
+    const storeId = c.req.param("storeId");
+
+    const ownership = await checkStoreOwnership(storeId, user.id);
+    if ("error" in ownership) {
+      return c.json({ error: ownership.error }, ownership.status as StatusCode);
+    }
+
+    const body = await c.req.json();
+    const validatedData = createOrderSchema.parse(body) as CreateOrder;
+
     const now = new Date();
     const newOrder = {
       ...validatedData,
       id: nanoid(),
+      storeId: ownership.store.id,
       createdAt: now,
       updatedAt: now,
     };
 
-    const [data] = await db.insert(orders).values(newOrder).returning();
+    const [data] = await db.insert(ordersTable).values(newOrder).returning();
 
     return c.json({
       ...data,
-      createdAt: data.createdAt,
-      updatedAt: data.updatedAt,
+      createdAt: data.createdAt.toISOString(),
+      updatedAt: data.updatedAt.toISOString(),
     });
   } catch (error) {
+    console.error("[orders/POST]: ", error);
     return c.json({ error: "Invalid order data" }, 400);
   }
 });
 
-ordersRouter.patch("/:id", async (c) => {
-  const id = c.req.param("id");
-  const body = await c.req.json();
-
+// Update order status
+ordersRouter.patch("/:storeId/:id", async (c) => {
   try {
+    const user = c.get("user");
+    const storeId = c.req.param("storeId");
+    const id = c.req.param("id");
+
+    const ownership = await checkStoreOwnership(storeId, user.id);
+    if ("error" in ownership) {
+      return c.json({ error: ownership.error }, ownership.status as StatusCode);
+    }
+
+    const body = await c.req.json();
+    const validatedData = updateOrderSchema.parse(body) as UpdateOrder;
+
     const [data] = await db
-      .update(orders)
+      .update(ordersTable)
       .set({
-        status: body.status,
+        status: validatedData.status,
         updatedAt: new Date(),
       })
-      .where(eq(orders.id, id))
+      .where(and(eq(ordersTable.id, id), eq(ordersTable.storeId, ownership.store.id)))
       .returning();
 
     if (!data) {
@@ -92,19 +138,31 @@ ordersRouter.patch("/:id", async (c) => {
 
     return c.json({
       ...data,
-      createdAt: data.createdAt,
-      updatedAt: data.updatedAt,
+      createdAt: data.createdAt.toISOString(),
+      updatedAt: data.updatedAt.toISOString(),
     });
   } catch (error) {
+    console.error("[orders/PATCH]: ", error);
     return c.json({ error: "Invalid status" }, 400);
   }
 });
 
-ordersRouter.delete("/:id", async (c) => {
-  const id = c.req.param("id");
-
+// Delete order
+ordersRouter.delete("/:storeId/:id", async (c) => {
   try {
-    const [deletedOrder] = await db.delete(orders).where(eq(orders.id, id)).returning();
+    const user = c.get("user");
+    const storeId = c.req.param("storeId");
+    const id = c.req.param("id");
+
+    const ownership = await checkStoreOwnership(storeId, user.id);
+    if ("error" in ownership) {
+      return c.json({ error: ownership.error }, ownership.status as StatusCode);
+    }
+
+    const [deletedOrder] = await db
+      .delete(ordersTable)
+      .where(and(eq(ordersTable.id, id), eq(ordersTable.storeId, ownership.store.id)))
+      .returning();
 
     if (!deletedOrder) {
       return c.json({ error: "Order not found" }, 404);
@@ -112,6 +170,7 @@ ordersRouter.delete("/:id", async (c) => {
 
     return c.json({ success: true });
   } catch (error) {
+    console.error("[orders/DELETE]: ", error);
     return c.json({ error: "Failed to delete order" }, 500);
   }
 });
