@@ -1,13 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
-import { getOrders } from "../services/api";
-import { Order, OrderStatus } from "../types/order";
+import { useParams } from "react-router-dom";
+import { getOrders } from "../services/orders";
+import { Order, OrderStatus } from "../types";
 import { formatTimestamp } from "../lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 
 export default function DisplayPage() {
+  const { storeId } = useParams<{ storeId: string }>();
+
   const { data: orders = [], dataUpdatedAt } = useQuery({
-    queryKey: ["orders"],
-    queryFn: getOrders,
+    queryKey: ["orders", storeId],
+    queryFn: () => (storeId ? getOrders(storeId) : Promise.resolve([])),
+    enabled: !!storeId,
     refetchInterval: 5000,
   });
 
@@ -33,7 +37,7 @@ export default function DisplayPage() {
           <div className="flex items-baseline text-2xl font-bold tracking-tight text-white sm:text-4xl">
             <span>F-</span>
             <span className="font-normal text-white/75">xxxx</span>
-            <span>{order.order_id}</span>
+            <span>{order.orderId}</span>
           </div>
           <div
             className={`rounded-full px-3 py-1 text-xs font-medium sm:px-4 sm:py-2 sm:text-base ${
@@ -47,10 +51,7 @@ export default function DisplayPage() {
         </div>
         <div className="flex items-center justify-between">
           <div className="text-lg text-white sm:text-xl">{order.name}</div>
-          <div className="text-xs text-white/90 sm:text-sm">
-            <span className="hidden sm:inline">Diperbarui: </span>
-            {formatTimestamp(order.updatedAt)}
-          </div>
+          <div className="text-xs text-white/90 sm:text-sm">{formatTimestamp(order.updatedAt)}</div>
         </div>
       </div>
     </div>

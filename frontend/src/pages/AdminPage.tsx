@@ -4,40 +4,50 @@ import {
   ArrowLeftStartOnRectangleIcon,
   CheckIcon,
   ArrowPathIcon,
+  ArrowLeftIcon,
 } from "@heroicons/react/24/outline";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/button";
 import { useToast } from "../hooks/use-toast";
-import { createOrder, getOrders, updateOrderStatus, deleteOrder } from "../services/api";
-import { OrderStatus, type Order } from "../types/order";
+import { createOrder, getOrders, updateOrderStatus, deleteOrder } from "../services/orders";
+import { OrderStatus, type Order } from "../types";
 import { formatTimestamp } from "../lib/utils";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../components/ui/dialog";
 import { NumPad } from "../components/NumPad";
 import { useAuth } from "../hooks/use-auth";
 
 type UpdateOrderStatusParams = {
+  storeId: string;
   id: string;
   status: Order["status"];
 };
 
+type DeleteOrderParams = {
+  storeId: string;
+  id: string;
+};
+
 export default function AdminPage() {
+  const { storeId } = useParams<{ storeId: string }>();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [inputStep, setInputStep] = useState<"orderId" | "name">("orderId");
-  const [newOrder, setNewOrder] = useState<{ order_id: string; name: string }>({
-    order_id: "",
+  const [newOrder, setNewOrder] = useState<{ orderId: string; name: string }>({
+    orderId: "",
     name: "",
   });
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { clearAuth } = useAuth();
+  const navigate = useNavigate();
 
   const { data: orders = [], dataUpdatedAt } = useQuery({
-    queryKey: ["orders"],
-    queryFn: getOrders,
+    queryKey: ["orders", storeId],
+    queryFn: () => (storeId ? getOrders(storeId) : Promise.resolve([])),
+    enabled: !!storeId,
     refetchInterval: 5000,
     select: (data) => {
-      // Sort orders by createdAt date, most recent first
       return [...data].sort(
         (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
@@ -45,25 +55,25 @@ export default function AdminPage() {
   });
 
   const createOrderMutation = useMutation({
-    mutationFn: (data: { order_id: string; name: string }) =>
-      createOrder({
-        ...data,
-        status: OrderStatus.PREPARING,
-      }),
+    mutationFn: (data: { orderId: string; name: string }) =>
+      storeId
+        ? createOrder(storeId, { ...data, status: OrderStatus.PREPARING })
+        : Promise.reject("No store ID"),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["orders"] });
+      queryClient.invalidateQueries({ queryKey: ["orders", storeId] });
       toast({
         title: "Berhasil",
         description: "Pesanan berhasil dibuat",
       });
-      setNewOrder({ order_id: "", name: "" });
+      setNewOrder({ orderId: "", name: "" });
     },
   });
 
   const updateStatusMutation = useMutation({
-    mutationFn: (params: UpdateOrderStatusParams) => updateOrderStatus(params.id, params.status),
+    mutationFn: ({ storeId, id, status }: UpdateOrderStatusParams) =>
+      updateOrderStatus(storeId, id, status),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["orders"] });
+      queryClient.invalidateQueries({ queryKey: ["orders", storeId] });
       toast({
         title: "Berhasil",
         description: "Status pesanan berhasil diperbarui",
@@ -72,9 +82,9 @@ export default function AdminPage() {
   });
 
   const deleteOrderMutation = useMutation({
-    mutationFn: deleteOrder,
+    mutationFn: ({ storeId, id }: DeleteOrderParams) => deleteOrder(storeId, id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["orders"] });
+      queryClient.invalidateQueries({ queryKey: ["orders", storeId] });
       toast({
         title: "Berhasil",
         description: "Pesanan berhasil dihapus",
@@ -85,11 +95,11 @@ export default function AdminPage() {
   const handleAddOrderClick = () => {
     setIsModalOpen(true);
     setInputStep("orderId");
-    setNewOrder({ order_id: "", name: "" });
+    setNewOrder({ orderId: "", name: "" });
   };
 
   const handleOrderIdComplete = () => {
-    if (newOrder.order_id) {
+    if (newOrder.orderId) {
       setInputStep("name");
     }
   };
@@ -113,25 +123,38 @@ export default function AdminPage() {
     <div className="flex h-[100svh] flex-col bg-[#FFDFB5]">
       <div className="flex flex-1 flex-col overflow-hidden">
         <div className="mx-auto w-full max-w-5xl p-3 pb-0 sm:p-6 sm:pb-0">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <h1 className="text-lg font-semibold text-brand-900 sm:text-xl">Manajemen Pesanan</h1>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <Button
+                onClick={() => navigate("/admin")}
+                variant="outline"
+                className="border-none bg-transparent px-3"
+              >
+                <ArrowLeftIcon className="h-4 w-4 stroke-[3]" />
+              </Button>
+              <h1 className="text-lg font-semibold text-brand-900 sm:text-xl">Pesanan</h1>
+            </div>
             <div className="flex gap-2">
               <Button
                 onClick={handleLogout}
                 variant="outline"
-                className="gap-1 px-2 text-xs hover:bg-red-500 hover:text-white sm:gap-2 sm:px-4 sm:text-sm"
+                className="gap-2 px-2 text-sm hover:bg-red-500 hover:text-white sm:px-4"
                 disabled={createOrderMutation.isPending}
               >
-                <ArrowLeftStartOnRectangleIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+                <ArrowLeftStartOnRectangleIcon className="h-4 w-4 stroke-[2]" />
                 <span className="hidden sm:inline">Keluar</span>
               </Button>
               <Button
                 onClick={handleAddOrderClick}
-                className="gap-1 bg-brand-500 px-2 text-xs text-white hover:bg-brand-600 sm:gap-2 sm:px-4 sm:text-sm"
+                className="gap-2 bg-brand-500 px-4 text-sm text-white hover:bg-brand-600"
                 disabled={createOrderMutation.isPending}
               >
-                <PlusIcon className="h-3 w-3 sm:h-4 sm:w-4" />
-                {createOrderMutation.isPending ? "..." : "Tambah"}
+                <PlusIcon className="h-4 w-4 stroke-[2]" />
+                {createOrderMutation.isPending ? (
+                  "..."
+                ) : (
+                  <span className="hidden sm:inline">Tambah</span>
+                )}
               </Button>
             </div>
           </div>
@@ -150,12 +173,12 @@ export default function AdminPage() {
                   className="rounded-lg bg-white p-3 shadow-sm transition-all hover:shadow-md sm:p-4"
                 >
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="space-y-1 sm:space-y-2">
+                    <div className="space-y-1">
                       <div className="flex items-center justify-between sm:justify-start sm:gap-3">
                         <div className="flex items-baseline text-lg font-bold tracking-tight text-brand-800 sm:text-xl">
                           <span>F-</span>
                           <span className="font-normal text-brand-300">xxxx</span>
-                          <span>{order.order_id}</span>
+                          <span>{order.orderId}</span>
                         </div>
                         <span
                           className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium sm:hidden ${
@@ -191,10 +214,12 @@ export default function AdminPage() {
                         <Button
                           variant="outline"
                           className="flex-1 px-2 text-xs hover:bg-red-500 hover:text-white"
-                          onClick={() => deleteOrderMutation.mutate(order.id)}
+                          onClick={() =>
+                            deleteOrderMutation.mutate({ storeId: storeId!, id: order.id })
+                          }
                           disabled={updateStatusMutation.isPending || deleteOrderMutation.isPending}
                         >
-                          <TrashIcon className="h-3 w-3" />
+                          <TrashIcon className="h-3 w-3 stroke-[2]" />
                         </Button>
                         <Button
                           variant="outline"
@@ -205,6 +230,7 @@ export default function AdminPage() {
                           }`}
                           onClick={() =>
                             updateStatusMutation.mutate({
+                              storeId: storeId!,
                               id: order.id,
                               status:
                                 order.status === OrderStatus.PREPARING
@@ -219,12 +245,12 @@ export default function AdminPage() {
                             "..."
                           ) : order.status === OrderStatus.PREPARING ? (
                             <>
-                              <CheckIcon className="h-3 w-3" />
+                              <CheckIcon className="h-3 w-3 stroke-[2]" />
                               <span>Selesai</span>
                             </>
                           ) : (
                             <>
-                              <ArrowPathIcon className="h-3 w-3" />
+                              <ArrowPathIcon className="h-3 w-3 stroke-[2]" />
                               <span>Ulang</span>
                             </>
                           )}
@@ -241,6 +267,7 @@ export default function AdminPage() {
                           }`}
                           onClick={() =>
                             updateStatusMutation.mutate({
+                              storeId: storeId!,
                               id: order.id,
                               status:
                                 order.status === OrderStatus.PREPARING
@@ -255,12 +282,12 @@ export default function AdminPage() {
                             "..."
                           ) : order.status === OrderStatus.PREPARING ? (
                             <>
-                              <CheckIcon className="h-4 w-4" />
+                              <CheckIcon className="h-4 w-4 stroke-[2]" />
                               <span>Selesai</span>
                             </>
                           ) : (
                             <>
-                              <ArrowPathIcon className="h-4 w-4" />
+                              <ArrowPathIcon className="h-4 w-4 stroke-[2]" />
                               <span>Ulang</span>
                             </>
                           )}
@@ -268,10 +295,12 @@ export default function AdminPage() {
                         <Button
                           variant="outline"
                           className="flex-1 gap-2 px-2 text-xs hover:bg-red-500 hover:text-white sm:px-4 sm:text-sm"
-                          onClick={() => deleteOrderMutation.mutate(order.id)}
+                          onClick={() =>
+                            deleteOrderMutation.mutate({ storeId: storeId!, id: order.id })
+                          }
                           disabled={updateStatusMutation.isPending || deleteOrderMutation.isPending}
                         >
-                          <TrashIcon className="h-4 w-4" />
+                          <TrashIcon className="h-4 w-4 stroke-[2]" />
                           <span>Hapus</span>
                         </Button>
                       </div>
@@ -297,7 +326,7 @@ export default function AdminPage() {
               <input
                 type="text"
                 className="w-full rounded-lg bg-gray-50 p-2 text-center text-xl leading-relaxed focus:outline-none focus:ring-1 focus:ring-brand-500 sm:p-3"
-                value={inputStep === "orderId" ? `F-xxxx${newOrder.order_id}` : newOrder.name}
+                value={inputStep === "orderId" ? `F-xxxx${newOrder.orderId}` : newOrder.name}
                 readOnly
                 placeholder={inputStep === "orderId" ? "F-xxxx___" : "Nama Pelanggan"}
               />
@@ -305,8 +334,8 @@ export default function AdminPage() {
 
             {inputStep === "orderId" ? (
               <NumPad
-                value={newOrder.order_id}
-                onChange={(value) => setNewOrder({ ...newOrder, order_id: value })}
+                value={newOrder.orderId}
+                onChange={(value) => setNewOrder({ ...newOrder, orderId: value })}
                 onEnter={handleOrderIdComplete}
               />
             ) : (
