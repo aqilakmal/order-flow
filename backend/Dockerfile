@@ -36,12 +36,15 @@ USER hono
 RUN echo "Backend Environment at build time:"
 RUN echo "PORT=${PORT}"
 RUN echo "FRONTEND_URL=${FRONTEND_URL}"
+RUN echo "INVITE_CODE_START=${INVITE_CODE_START}"
 
 # Add runtime debug script
 COPY --chown=hono:nodejs <<'EOF' /app/start.sh
 #!/bin/sh
 echo "Backend Environment at runtime:"
 echo "PORT=${PORT}"
+echo "FRONTEND_URL=${FRONTEND_URL}"
+echo "INVITE_CODE_START=${INVITE_CODE_START}"
 echo "Starting server..."
 exec node dist/server.js
 EOF

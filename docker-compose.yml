@@ -15,6 +15,7 @@ services:
       - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
       - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
       - FRONTEND_URL=${FRONTEND_URL}
+      - INVITE_CODE_START=${INVITE_CODE_START}
     restart: unless-stopped
 
   frontend:
