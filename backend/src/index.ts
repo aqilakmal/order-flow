@@ -7,9 +7,10 @@ import authRoutes from "./routes/auth.js";
 import orderRoutes from "./routes/orders.js";
 import storesRouter from "./routes/stores.js";
 
-console.log("CORS configuration:", {
+console.log("Configuration:", {
   frontendUrl: process.env.FRONTEND_URL,
   nodeEnv: process.env.NODE_ENV,
+  inviteCodeStart: process.env.INVITE_CODE_START,
 });
 
 const app = new Hono();

@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { Hono } from "hono";
 import { z } from "zod";
 import { supabase } from "../db/index.js";
@@ -26,7 +27,7 @@ auth.post("/signup", async (c) => {
     const body = await c.req.json();
     const { email, password, inviteCode } = signupSchema.parse(body);
 
-    const expectedInviteCode = "INV" + email.slice(0, 3).toUpperCase();
+    const expectedInviteCode = process.env.INVITE_CODE_START + email.slice(0, 3).toUpperCase();
 
     if (inviteCode !== expectedInviteCode) {
       return c.json({ error: "Invalid invite code" }, 400);
