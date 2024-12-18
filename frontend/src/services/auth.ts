@@ -1,10 +1,7 @@
 import { z } from "zod";
-
-const API_URL = import.meta.env.VITE_API_URL;
-
-if (!API_URL) {
-  throw new Error("VITE_API_URL environment variable is not set");
-}
+import { useApi } from "./_api";
+import { useSetAtom, useAtomValue } from "jotai";
+import { setAuthAtom, clearAuthAtom, sessionAtom } from "../store/auth";
 
 const UserSchema = z.object({
   id: z.string(),
@@ -19,60 +16,73 @@ const SessionSchema = z.object({
 export type User = z.infer<typeof UserSchema>;
 export type Session = z.infer<typeof SessionSchema>;
 
-export async function signIn(email: string, password: string) {
-  const response = await fetch(`${API_URL}/auth/signin`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    mode: "cors",
-    credentials: "include",
-    body: JSON.stringify({ email, password }),
-  });
+type AuthResponse = {
+  user: User;
+  session?: Session;
+};
 
-  const data = await response.json();
-  if (!response.ok) throw new Error(data.error);
+export function useAuthService() {
+  const api = useApi();
+  const setAuth = useSetAtom(setAuthAtom);
+  const clearAuth = useSetAtom(clearAuthAtom);
+  const session = useAtomValue(sessionAtom);
 
-  return {
-    session: SessionSchema.parse(data.session),
-    user: UserSchema.parse(data.user),
+  const signIn = async (email: string, password: string) => {
+    const data = await api.post<AuthResponse>("/auth/signin", { email, password });
+    if (!data.session) throw new Error("No session returned");
+    
+    const user = UserSchema.parse(data.user);
+    const session = SessionSchema.parse(data.session);
+    
+    setAuth({ user, session });
+    
+    return { user, session };
   };
-}
 
-export async function signUp(email: string, password: string) {
-  const response = await fetch(`${API_URL}/auth/signup`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    mode: "cors",
-    credentials: "include",
-    body: JSON.stringify({ email, password }),
-  });
-
-  const data = await response.json();
-  if (!response.ok) throw new Error(data.error);
-
-  return {
-    user: UserSchema.parse(data.user),
+  const signUp = async (email: string, password: string, inviteCode: string) => {
+    const data = await api.post<AuthResponse>("/auth/signup", { 
+      email, 
+      password,
+      inviteCode
+    });
+    return {
+      user: UserSchema.parse(data.user),
+    };
   };
-}
 
-export async function validateSession(token: string) {
-  const response = await fetch(`${API_URL}/auth/validate`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-    mode: "cors",
-    credentials: "include",
-  });
+  const validateSession = async () => {
+    if (!session) {
+      clearAuth();
+      return null;
+    }
 
-  if (!response.ok) {
-    throw new Error("Invalid session");
-  }
+    try {
+      const data = await api.get<AuthResponse>("/auth/validate");
+      const user = UserSchema.parse(data.user);
+      
+      // Only update user data, keep existing session
+      setAuth({ user, session });
+      
+      return user;
+    } catch (error) {
+      clearAuth();
+      throw error; // Let React Query handle the error
+    }
+  };
 
-  const data = await response.json();
+  const signOut = () => {
+    clearAuth();
+  };
+
+  const changePassword = async (currentPassword: string, newPassword: string) => {
+    await api.post("/auth/change-password", { currentPassword, newPassword });
+  };
+
   return {
-    user: UserSchema.parse(data.user),
+    signIn,
+    signUp,
+    validateSession,
+    signOut,
+    changePassword,
   };
 }
