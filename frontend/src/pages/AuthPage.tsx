@@ -8,13 +8,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs"
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { useToast } from "../hooks/use-toast";
-import { signIn, signUp } from "../services/auth";
-import { useAuth } from "../hooks/use-auth";
+import { useAuthService } from "../services/auth";
 
 // Form validation schema
 const authSchema = z.object({
   email: z.string().email("Format email tidak valid").min(1, "Email wajib diisi"),
   password: z.string().min(6, "Kata sandi minimal 6 karakter").min(1, "Kata sandi wajib diisi"),
+  inviteCode: z.string().optional(),
 });
 
 type AuthFormValues = z.infer<typeof authSchema>;
@@ -22,20 +22,20 @@ type AuthFormValues = z.infer<typeof authSchema>;
 export default function AuthPage() {
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { setAuth } = useAuth();
+  const { signIn, signUp } = useAuthService();
 
   const form = useForm<AuthFormValues>({
     resolver: zodResolver(authSchema),
     defaultValues: {
       email: "",
       password: "",
+      inviteCode: "",
     },
   });
 
   const signInMutation = useMutation({
     mutationFn: (data: AuthFormValues) => signIn(data.email, data.password),
-    onSuccess: (data) => {
-      setAuth(data.user, data.session);
+    onSuccess: () => {
       navigate("/admin");
       toast({
         title: "Selamat datang kembali!",
@@ -52,7 +52,7 @@ export default function AuthPage() {
   });
 
   const signUpMutation = useMutation({
-    mutationFn: (data: AuthFormValues) => signUp(data.email, data.password),
+    mutationFn: (data: AuthFormValues) => signUp(data.email, data.password, data.inviteCode || ""),
     onSuccess: () => {
       toast({
         title: "Akun telah dibuat",
@@ -86,11 +86,11 @@ export default function AuthPage() {
 
   return (
     <div className="relative h-screen overflow-hidden bg-[#FFDFB5]">
-      <div className="container mx-auto flex h-screen items-center justify-center">
+      <div className="container mx-auto flex h-screen items-center justify-center px-4 sm:px-6">
         <div className="w-full max-w-sm rounded-lg bg-white p-6 shadow-lg">
           <div className="mb-4 text-center">
             <h1 className="text-2xl font-bold text-brand-900">Order Flow</h1>
-            <p className="mt-1 text-sm text-brand-700">Masuk untuk mengelola pesanan</p>
+            <p className="mt-1 text-sm font-medium text-brand-700">Masuk untuk mengelola pesanan</p>
           </div>
 
           <Tabs defaultValue="signin" className="w-full">
@@ -192,6 +192,25 @@ export default function AuthPage() {
                       {form.formState.errors.password.message}
                     </p>
                   )}
+                </div>
+                <div>
+                  <Input
+                    type="text"
+                    placeholder="Kode Undangan"
+                    {...form.register("inviteCode")}
+                    onKeyDown={(e) => handleKeyDown(e, false)}
+                    className={`hover:border-brand-300 focus-visible:ring-brand-500 ${
+                      form.formState.errors.inviteCode ? "border-red-500" : ""
+                    }`}
+                  />
+                  {form.formState.errors.inviteCode && (
+                    <p className="mt-1 text-sm text-red-500">
+                      {form.formState.errors.inviteCode.message}
+                    </p>
+                  )}
+                  <p className="mt-1 text-xs text-neutral-500">
+                    *Saat ini pendaftaran hanya melalui undangan
+                  </p>
                 </div>
                 <Button
                   type="submit"
