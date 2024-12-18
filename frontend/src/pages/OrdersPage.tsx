@@ -122,7 +122,7 @@ export default function OrdersPage() {
               <Button
                 onClick={() => navigate("/admin")}
                 variant="outline"
-                className="border-none bg-transparent pl-0 pr-3 shadow-none text-brand-900"
+                className="border-none bg-transparent pl-0 pr-3 shadow-none text-brand-900 hover:bg-transparent"
               >
                 <ArrowLeftIcon className="h-4 w-4 stroke-[3]" />
               </Button>
