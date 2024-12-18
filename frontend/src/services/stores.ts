@@ -1,66 +1,38 @@
 import { Store, createStoreSchema, type Store as StoreType, type CreateStore } from "../types";
+import { useApi } from "./_api";
 
-const API_URL = import.meta.env.VITE_API_URL;
+export function useStoresService() {
+  const api = useApi();
 
-if (!API_URL) {
-  throw new Error("VITE_API_URL environment variable is not set");
-}
-
-function getAuthHeader(): HeadersInit {
-  const session = localStorage.getItem("session");
-  if (!session) return {};
-
-  const { access_token } = JSON.parse(session);
-  return {
-    Authorization: `Bearer ${access_token}`,
-    "Content-Type": "application/json",
+  const getStores = async (): Promise<StoreType[]> => {
+    const data = await api.get<unknown[]>("/stores");
+    try {
+      return data.map((store) => Store.parse(store));
+    } catch (error) {
+      console.error("Store validation failed:", error);
+      throw error;
+    }
   };
-}
 
-export async function getStores(): Promise<StoreType[]> {
-  const response = await fetch(`${API_URL}/stores`, {
-    headers: getAuthHeader(),
-  });
-  const data = await response.json();
-  try {
-    return data.map((store: unknown) => Store.parse(store));
-  } catch (error) {
-    console.error("Store validation failed:", error);
-    throw error;
-  }
-}
+  const createStore = async (data: CreateStore) => {
+    const validatedData = createStoreSchema.parse(data);
+    const responseData = await api.post<unknown>("/stores", validatedData);
+    return Store.parse(responseData);
+  };
 
-export async function createStore(data: CreateStore) {
-  const validatedData = createStoreSchema.parse(data);
-  const response = await fetch(`${API_URL}/stores`, {
-    method: "POST",
-    headers: getAuthHeader(),
-    body: JSON.stringify(validatedData),
-    mode: "cors",
-    credentials: "include",
-  });
-  const responseData = await response.json();
-  return Store.parse(responseData);
-}
+  const updateStore = async (id: string, data: Partial<CreateStore>) => {
+    const responseData = await api.patch<unknown>(`/stores/${id}`, data);
+    return Store.parse(responseData);
+  };
 
-export async function updateStore(id: string, data: Partial<CreateStore>) {
-  const response = await fetch(`${API_URL}/stores/${id}`, {
-    method: "PATCH",
-    headers: getAuthHeader(),
-    body: JSON.stringify(data),
-    mode: "cors",
-    credentials: "include",
-  });
-  const responseData = await response.json();
-  return Store.parse(responseData);
-}
+  const deleteStore = async (id: string) => {
+    return api.delete(`/stores/${id}`);
+  };
 
-export async function deleteStore(id: string) {
-  const response = await fetch(`${API_URL}/stores/${id}`, {
-    method: "DELETE",
-    headers: getAuthHeader(),
-    mode: "cors",
-    credentials: "include",
-  });
-  return response.ok;
+  return {
+    getStores,
+    createStore,
+    updateStore,
+    deleteStore,
+  };
 }

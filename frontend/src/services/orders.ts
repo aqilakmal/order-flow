@@ -1,69 +1,41 @@
 import { Order, createOrderSchema, type Order as OrderType } from "../types";
+import { useApi } from "./_api";
 
-const API_URL = import.meta.env.VITE_API_URL;
+export function useOrdersService() {
+  const api = useApi();
 
-if (!API_URL) {
-  throw new Error("VITE_API_URL environment variable is not set");
-}
-
-function getAuthHeader(): HeadersInit {
-  const session = localStorage.getItem("session");
-  if (!session) return {};
-
-  const { access_token } = JSON.parse(session);
-  return {
-    Authorization: `Bearer ${access_token}`,
-    "Content-Type": "application/json",
+  const getOrders = async (storeId: string): Promise<OrderType[]> => {
+    const data = await api.get<unknown[]>(`/orders/${storeId}`);
+    try {
+      return data.map((order) => Order.parse(order));
+    } catch (error) {
+      console.error("Order validation failed:", error);
+      throw error;
+    }
   };
-}
 
-export async function getOrders(storeId: string): Promise<OrderType[]> {
-  const response = await fetch(`${API_URL}/orders/${storeId}`, {
-    headers: getAuthHeader(),
-  });
-  const data = await response.json();
-  try {
-    return data.map((order: unknown) => Order.parse(order));
-  } catch (error) {
-    console.error("Order validation failed:", error);
-    throw error;
-  }
-}
+  const createOrder = async (
+    storeId: string,
+    data: Omit<OrderType, "id" | "storeId" | "createdAt" | "updatedAt">
+  ) => {
+    const validatedData = createOrderSchema.parse(data);
+    const responseData = await api.post<unknown>(`/orders/${storeId}`, validatedData);
+    return Order.parse(responseData);
+  };
 
-export async function createOrder(
-  storeId: string,
-  data: Omit<OrderType, "id" | "storeId" | "createdAt" | "updatedAt">
-) {
-  const validatedData = createOrderSchema.parse(data);
-  const response = await fetch(`${API_URL}/orders/${storeId}`, {
-    method: "POST",
-    headers: getAuthHeader(),
-    body: JSON.stringify(validatedData),
-    mode: "cors",
-    credentials: "include",
-  });
-  const responseData = await response.json();
-  return Order.parse(responseData);
-}
+  const updateOrderStatus = async (storeId: string, id: string, status: OrderType["status"]) => {
+    const data = await api.patch<unknown>(`/orders/${storeId}/${id}`, { status });
+    return Order.parse(data);
+  };
 
-export async function updateOrderStatus(storeId: string, id: string, status: OrderType["status"]) {
-  const response = await fetch(`${API_URL}/orders/${storeId}/${id}`, {
-    method: "PATCH",
-    headers: getAuthHeader(),
-    body: JSON.stringify({ status }),
-    mode: "cors",
-    credentials: "include",
-  });
-  const data = await response.json();
-  return Order.parse(data);
-}
+  const deleteOrder = async (storeId: string, id: string) => {
+    return api.delete(`/orders/${storeId}/${id}`);
+  };
 
-export async function deleteOrder(storeId: string, id: string) {
-  const response = await fetch(`${API_URL}/orders/${storeId}/${id}`, {
-    method: "DELETE",
-    headers: getAuthHeader(),
-    mode: "cors",
-    credentials: "include",
-  });
-  return response.ok;
+  return {
+    getOrders,
+    createOrder,
+    updateOrderStatus,
+    deleteOrder,
+  };
 }

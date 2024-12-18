@@ -1,8 +1,21 @@
+import { useAtomValue } from "jotai";
+import { sessionAtom } from "../store/auth";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
+}
+
+export function useAuthHeader(): HeadersInit {
+  const session = useAtomValue(sessionAtom);
+  
+  if (!session) return {};
+
+  return {
+    Authorization: `Bearer ${session.access_token}`,
+    "Content-Type": "application/json",
+  };
 }
 
 export function formatTimestamp(date: Date | string | number, lastUpdated?: number): string {
