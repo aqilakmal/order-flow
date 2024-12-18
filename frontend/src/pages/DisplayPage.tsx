@@ -1,12 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
-import { getOrders } from "../services/orders";
+import { useOrdersService } from "../services/orders";
 import { Order, OrderStatus } from "../types";
 import { formatTimestamp } from "../lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 
 export default function DisplayPage() {
   const { storeId } = useParams<{ storeId: string }>();
+  const { getOrders } = useOrdersService();
 
   const { data: orders = [], dataUpdatedAt } = useQuery({
     queryKey: ["orders", storeId],
@@ -16,12 +17,12 @@ export default function DisplayPage() {
   });
 
   const preparingOrders = orders
-    .filter((order) => order.status === OrderStatus.PREPARING)
-    .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+    .filter((order: Order) => order.status === OrderStatus.PREPARING)
+    .sort((a: Order, b: Order) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
 
   const completedOrders = orders
-    .filter((order) => order.status === OrderStatus.COMPLETED)
-    .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+    .filter((order: Order) => order.status === OrderStatus.COMPLETED)
+    .sort((a: Order, b: Order) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
 
   const timeSinceLastUpdate = Math.floor((Date.now() - dataUpdatedAt) / 1000);
   const isStale = timeSinceLastUpdate > 30;
@@ -80,7 +81,7 @@ export default function DisplayPage() {
 
             <TabsContent value="preparing" className="flex-1 overflow-y-auto py-3 pt-2">
               <div className="space-y-3">
-                {preparingOrders.map((order) => (
+                {preparingOrders.map((order: Order) => (
                   <OrderCard key={order.id} order={order} variant="preparing" />
                 ))}
                 {preparingOrders.length === 0 && (
@@ -93,7 +94,7 @@ export default function DisplayPage() {
 
             <TabsContent value="completed" className="flex-1 overflow-y-auto py-3 pt-2">
               <div className="space-y-3">
-                {completedOrders.map((order) => (
+                {completedOrders.map((order: Order) => (
                   <OrderCard key={order.id} order={order} variant="completed" />
                 ))}
                 {completedOrders.length === 0 && (
@@ -122,7 +123,7 @@ export default function DisplayPage() {
 
           <div className="flex-1 overflow-y-auto px-6">
             <div className="space-y-6 pb-6">
-              {preparingOrders.map((order) => (
+              {preparingOrders.map((order: Order) => (
                 <OrderCard key={order.id} order={order} variant="preparing" />
               ))}
               {preparingOrders.length === 0 && (
@@ -147,7 +148,7 @@ export default function DisplayPage() {
 
           <div className="flex-1 overflow-y-auto px-6">
             <div className="space-y-6 pb-6">
-              {completedOrders.map((order) => (
+              {completedOrders.map((order: Order) => (
                 <OrderCard key={order.id} order={order} variant="completed" />
               ))}
               {completedOrders.length === 0 && (
@@ -164,7 +165,18 @@ export default function DisplayPage() {
       <div className="bg-neutral-800 px-3 py-1.5 sm:px-4 sm:py-2">
         <div className="mx-1 flex items-center justify-between sm:mx-2">
           <div className="flex-1">
-            <h1 className="text-[10px] text-brand-100 sm:text-xs">Order Flow</h1>
+            <h1 className="text-[10px] text-brand-100 sm:text-xs">
+              <span className="hidden sm:inline">Made by </span>
+              <span className="inline sm:hidden">By </span>
+              <a
+                href="https://github.com/aqilakmal"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-brand-300 hover:text-brand-200 transition-colors"
+              >
+                @aqilakmal
+              </a>
+            </h1>
           </div>
           <div
             className={`flex items-center gap-1 sm:gap-2 ${isStale ? "text-red-500" : "text-green-500"}`}

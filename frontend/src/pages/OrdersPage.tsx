@@ -10,11 +10,12 @@ import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/button";
 import { useToast } from "../hooks/use-toast";
-import { createOrder, getOrders, updateOrderStatus, deleteOrder } from "../services/orders";
+import { useOrdersService } from "../services/orders";
 import { OrderStatus, type Order } from "../types";
 import { formatTimestamp } from "../lib/utils";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../components/ui/dialog";
-import { NumPad } from "../components/NumPad";
+import { OrderPad } from "../components/order-pad";
+import { Loading } from "../components/loading";
 
 type UpdateOrderStatusParams = {
   storeId: string;
@@ -38,8 +39,9 @@ export default function OrdersPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const { getOrders, createOrder, updateOrderStatus, deleteOrder } = useOrdersService();
 
-  const { data: orders = [], dataUpdatedAt } = useQuery({
+  const { data: orders = [], dataUpdatedAt, isLoading } = useQuery({
     queryKey: ["orders", storeId],
     queryFn: () => (storeId ? getOrders(storeId) : Promise.resolve([])),
     enabled: !!storeId,
@@ -120,7 +122,7 @@ export default function OrdersPage() {
               <Button
                 onClick={() => navigate("/admin")}
                 variant="outline"
-                className="border-none bg-transparent px-3"
+                className="border-none bg-transparent pl-0 pr-3 shadow-none text-brand-900"
               >
                 <ArrowLeftIcon className="h-4 w-4 stroke-[3]" />
               </Button>
@@ -145,7 +147,11 @@ export default function OrdersPage() {
 
         <div className="mx-auto mt-3 w-full max-w-5xl flex-1 overflow-y-auto p-3 pt-0 sm:p-6 sm:pt-0">
           <div className="space-y-3 sm:space-y-4">
-            {orders.length === 0 ? (
+            {isLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loading />
+              </div>
+            ) : orders.length === 0 ? (
               <div className="rounded-lg bg-white p-8 text-center">
                 <p className="text-sm text-neutral-500 sm:text-base">Tidak ada pesanan</p>
               </div>
@@ -297,50 +303,37 @@ export default function OrdersPage() {
       </div>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="max-w-[90%] rounded-lg p-3 sm:mx-auto sm:max-w-[400px] sm:rounded-xl sm:p-4">
+        <DialogContent className="max-w-96">
           <DialogHeader>
-            <DialogTitle className="text-center text-base font-semibold text-brand-900 sm:text-lg">
-              {inputStep === "orderId" ? "Masukkan ID Pesanan" : "Masukkan Nama"}
+            <DialogTitle>
+              {inputStep === "orderId" ? "Nomor Pesanan" : "Nama Pelanggan"}
             </DialogTitle>
           </DialogHeader>
 
-          <div className="flex flex-col items-center gap-3 py-2 sm:gap-4 sm:py-3">
-            <div className="w-full px-2">
-              <input
-                type="text"
-                className="w-full rounded-lg bg-gray-50 p-2 text-center text-xl leading-relaxed focus:outline-none focus:ring-1 focus:ring-brand-500 sm:p-3"
-                value={inputStep === "orderId" ? `F-xxxx${newOrder.orderId}` : newOrder.name}
-                readOnly
-                placeholder={inputStep === "orderId" ? "F-xxxx___" : "Nama Pelanggan"}
-              />
+          <div className="space-y-3">
+            <div className="text-center text-xl font-semibold tracking-wider text-brand-900">
+              {inputStep === "orderId" ? (
+                <>
+                  F-<span className="text-brand-300">xxxx</span>
+                  {newOrder.orderId}
+                </>
+              ) : (
+                newOrder.name
+              )}
             </div>
 
-            {inputStep === "orderId" ? (
-              <NumPad
-                value={newOrder.orderId}
-                onChange={(value) => setNewOrder({ ...newOrder, orderId: value })}
-                onEnter={handleOrderIdComplete}
-              />
-            ) : (
-              <div className="w-full px-2">
-                <input
-                  type="text"
-                  className="w-full rounded-lg border border-gray-200 p-2 text-lg leading-relaxed focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 sm:p-3 sm:text-xl"
-                  value={newOrder.name}
-                  onChange={(e) => setNewOrder({ ...newOrder, name: e.target.value })}
-                  onKeyDown={(e) => e.key === "Enter" && handleNameComplete()}
-                  autoFocus
-                  placeholder="Ketik nama..."
-                />
-                <Button
-                  className="mt-2 h-10 w-full rounded-lg bg-brand-500 text-sm text-white hover:bg-brand-600 active:bg-brand-700 sm:h-12 sm:text-base"
-                  onClick={handleNameComplete}
-                  disabled={createOrderMutation.isPending}
-                >
-                  {createOrderMutation.isPending ? "..." : "Tampilkan"}
-                </Button>
-              </div>
-            )}
+            <OrderPad
+              value={inputStep === "orderId" ? newOrder.orderId : newOrder.name}
+              onChange={(value) =>
+                setNewOrder((prev) => ({
+                  ...prev,
+                  [inputStep]: value,
+                }))
+              }
+              onComplete={inputStep === "orderId" ? handleOrderIdComplete : handleNameComplete}
+              mode={inputStep === "orderId" ? "number" : "text"}
+              maxLength={inputStep === "orderId" ? 3 : undefined}
+            />
           </div>
         </DialogContent>
       </Dialog>
@@ -348,7 +341,18 @@ export default function OrdersPage() {
       <div className="bg-neutral-800 px-3 py-1.5 sm:px-4 sm:py-2">
         <div className="mx-1 flex items-center justify-between sm:mx-2">
           <div className="flex-1">
-            <h1 className="text-[10px] text-brand-100 sm:text-xs">Order Flow</h1>
+            <h1 className="text-[10px] text-brand-100 sm:text-xs">
+              <span className="hidden sm:inline">Made by </span>
+              <span className="inline sm:hidden">By </span>
+              <a
+                href="https://github.com/aqilakmal"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-brand-300 hover:text-brand-200 transition-colors"
+              >
+                @aqilakmal
+              </a>
+            </h1>
           </div>
           <div
             className={`flex items-center gap-1 sm:gap-2 ${isStale ? "text-red-500" : "text-green-500"}`}
