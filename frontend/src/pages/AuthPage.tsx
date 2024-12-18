@@ -86,7 +86,7 @@ export default function AuthPage() {
 
   return (
     <div className="relative h-screen overflow-hidden bg-[#FFDFB5]">
-      <div className="container mx-auto flex h-screen items-center justify-center px-4 sm:px-6">
+      <div className="container mx-auto flex h-screen flex-col items-center justify-center px-4 sm:px-6">
         <div className="w-full max-w-sm rounded-lg bg-white p-6 shadow-lg">
           <div className="mb-4 text-center">
             <h1 className="text-2xl font-bold text-brand-900">Order Flow</h1>
@@ -120,7 +120,7 @@ export default function AuthPage() {
                     placeholder="Email"
                     {...form.register("email")}
                     onKeyDown={(e) => handleKeyDown(e, true)}
-                    className={`hover:border-brand-300 focus-visible:ring-brand-500 ${
+                    className={`text-sm hover:border-brand-300 focus-visible:ring-brand-500 ${
                       form.formState.errors.email ? "border-red-500" : ""
                     }`}
                   />
@@ -136,7 +136,7 @@ export default function AuthPage() {
                     placeholder="Kata Sandi"
                     {...form.register("password")}
                     onKeyDown={(e) => handleKeyDown(e, true)}
-                    className={`hover:border-brand-300 focus-visible:ring-brand-500 ${
+                    className={`text-sm hover:border-brand-300 focus-visible:ring-brand-500 ${
                       form.formState.errors.password ? "border-red-500" : ""
                     }`}
                   />
@@ -167,7 +167,7 @@ export default function AuthPage() {
                     placeholder="Email"
                     {...form.register("email")}
                     onKeyDown={(e) => handleKeyDown(e, false)}
-                    className={`hover:border-brand-300 focus-visible:ring-brand-500 ${
+                    className={`text-sm hover:border-brand-300 focus-visible:ring-brand-500 ${
                       form.formState.errors.email ? "border-red-500" : ""
                     }`}
                   />
@@ -183,7 +183,7 @@ export default function AuthPage() {
                     placeholder="Kata Sandi"
                     {...form.register("password")}
                     onKeyDown={(e) => handleKeyDown(e, false)}
-                    className={`hover:border-brand-300 focus-visible:ring-brand-500 ${
+                    className={`text-sm hover:border-brand-300 focus-visible:ring-brand-500 ${
                       form.formState.errors.password ? "border-red-500" : ""
                     }`}
                   />
@@ -199,7 +199,7 @@ export default function AuthPage() {
                     placeholder="Kode Undangan"
                     {...form.register("inviteCode")}
                     onKeyDown={(e) => handleKeyDown(e, false)}
-                    className={`hover:border-brand-300 focus-visible:ring-brand-500 ${
+                    className={`text-sm hover:border-brand-300 focus-visible:ring-brand-500 ${
                       form.formState.errors.inviteCode ? "border-red-500" : ""
                     }`}
                   />
@@ -208,8 +208,8 @@ export default function AuthPage() {
                       {form.formState.errors.inviteCode.message}
                     </p>
                   )}
-                  <p className="mt-1 text-xs text-neutral-500">
-                    *Saat ini pendaftaran hanya melalui undangan
+                  <p className="mt-1 text-xs text-brand-500">
+                    *Pendaftaran hanya melalui undangan
                   </p>
                 </div>
                 <Button
@@ -222,6 +222,18 @@ export default function AuthPage() {
               </form>
             </TabsContent>
           </Tabs>
+        </div>
+
+        <div className="mt-4 text-center text-xs text-neutral-500">
+          Made by{" "}
+          <a
+            href="https://github.com/aqilakmal"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-brand-500 hover:text-brand-600 transition-colors"
+          >
+            @aqilakmal
+          </a>
         </div>
       </div>
     </div>
