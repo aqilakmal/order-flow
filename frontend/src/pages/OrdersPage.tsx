@@ -41,7 +41,11 @@ export default function OrdersPage() {
   const navigate = useNavigate();
   const { getOrders, createOrder, updateOrderStatus, deleteOrder } = useOrdersService();
 
-  const { data: orders = [], dataUpdatedAt, isLoading } = useQuery({
+  const {
+    data: orders = [],
+    dataUpdatedAt,
+    isLoading,
+  } = useQuery({
     queryKey: ["orders", storeId],
     queryFn: () => (storeId ? getOrders(storeId) : Promise.resolve([])),
     enabled: !!storeId,
@@ -122,7 +126,7 @@ export default function OrdersPage() {
               <Button
                 onClick={() => navigate("/admin")}
                 variant="outline"
-                className="border-none bg-transparent pl-0 pr-3 shadow-none text-brand-900 hover:bg-transparent"
+                className="border-none bg-transparent pl-0 pr-3 text-brand-900 shadow-none hover:bg-transparent"
               >
                 <ArrowLeftIcon className="h-4 w-4 stroke-[3]" />
               </Button>
@@ -348,7 +352,7 @@ export default function OrdersPage() {
                 href="https://github.com/aqilakmal"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-brand-300 hover:text-brand-200 transition-colors"
+                className="text-brand-300 transition-colors hover:text-brand-200"
               >
                 @aqilakmal
               </a>

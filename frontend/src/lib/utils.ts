@@ -9,7 +9,7 @@ export function cn(...inputs: ClassValue[]) {
 
 export function useAuthHeader(): HeadersInit {
   const session = useAtomValue(sessionAtom);
-  
+
   if (!session) return {};
 
   return {

@@ -30,20 +30,20 @@ export function useAuthService() {
   const signIn = async (email: string, password: string) => {
     const data = await api.post<AuthResponse>("/auth/signin", { email, password });
     if (!data.session) throw new Error("No session returned");
-    
+
     const user = UserSchema.parse(data.user);
     const session = SessionSchema.parse(data.session);
-    
+
     setAuth({ user, session });
-    
+
     return { user, session };
   };
 
   const signUp = async (email: string, password: string, inviteCode: string) => {
-    const data = await api.post<AuthResponse>("/auth/signup", { 
-      email, 
+    const data = await api.post<AuthResponse>("/auth/signup", {
+      email,
       password,
-      inviteCode
+      inviteCode,
     });
     return {
       user: UserSchema.parse(data.user),
@@ -59,10 +59,10 @@ export function useAuthService() {
     try {
       const data = await api.get<AuthResponse>("/auth/validate");
       const user = UserSchema.parse(data.user);
-      
+
       // Only update user data, keep existing session
       setAuth({ user, session });
-      
+
       return user;
     } catch (error) {
       clearAuth();

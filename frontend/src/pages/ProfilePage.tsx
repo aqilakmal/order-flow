@@ -10,14 +10,25 @@ import { Button } from "../components/ui/button";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import { useNavigate } from "react-router-dom";
 
-const passwordChangeSchema = z.object({
-  currentPassword: z.string().min(6, "Kata sandi minimal 6 karakter").min(1, "Kata sandi wajib diisi"),
-  newPassword: z.string().min(6, "Kata sandi minimal 6 karakter").min(1, "Kata sandi wajib diisi"),
-  confirmPassword: z.string().min(6, "Kata sandi minimal 6 karakter").min(1, "Kata sandi wajib diisi"),
-}).refine((data) => data.newPassword === data.confirmPassword, {
-  message: "Kata sandi tidak cocok",
-  path: ["confirmPassword"],
-});
+const passwordChangeSchema = z
+  .object({
+    currentPassword: z
+      .string()
+      .min(6, "Kata sandi minimal 6 karakter")
+      .min(1, "Kata sandi wajib diisi"),
+    newPassword: z
+      .string()
+      .min(6, "Kata sandi minimal 6 karakter")
+      .min(1, "Kata sandi wajib diisi"),
+    confirmPassword: z
+      .string()
+      .min(6, "Kata sandi minimal 6 karakter")
+      .min(1, "Kata sandi wajib diisi"),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Kata sandi tidak cocok",
+    path: ["confirmPassword"],
+  });
 
 type PasswordChangeForm = z.infer<typeof passwordChangeSchema>;
 
@@ -64,7 +75,7 @@ export default function ProfilePage() {
               <Button
                 onClick={() => navigate("/admin")}
                 variant="outline"
-                className="border-none bg-transparent pl-0 pr-3 shadow-none text-brand-900 hover:bg-transparent"
+                className="border-none bg-transparent pl-0 pr-3 text-brand-900 shadow-none hover:bg-transparent"
               >
                 <ArrowLeftIcon className="h-4 w-4 stroke-[3]" />
               </Button>
@@ -74,7 +85,7 @@ export default function ProfilePage() {
         </div>
 
         <div className="mx-auto w-full max-w-5xl flex-1 overflow-y-auto p-3 pt-0 sm:p-6 sm:pt-0">
-          <div className="flex h-full items-center justify-center -mt-5">
+          <div className="-mt-5 flex h-full items-center justify-center">
             <div className="w-full max-w-sm rounded-lg bg-white p-6 shadow-lg">
               <div className="mb-6">
                 <label className="font-semibold text-brand-900">Email</label>

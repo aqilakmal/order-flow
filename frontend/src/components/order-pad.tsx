@@ -8,7 +8,13 @@ export interface OrderPadProps {
   maxLength?: number;
 }
 
-export function OrderPad({ value, onChange, onComplete, mode = "number", maxLength }: OrderPadProps) {
+export function OrderPad({
+  value,
+  onChange,
+  onComplete,
+  mode = "number",
+  maxLength,
+}: OrderPadProps) {
   const handleNumberClick = (num: string) => {
     if (maxLength && value.length >= maxLength) return;
     onChange(value + num);

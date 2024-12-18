@@ -1,4 +1,10 @@
-import { PlusIcon, TrashIcon, PencilIcon, ArrowLeftStartOnRectangleIcon, UserIcon } from "@heroicons/react/24/outline";
+import {
+  PlusIcon,
+  TrashIcon,
+  PencilIcon,
+  ArrowLeftStartOnRectangleIcon,
+  UserIcon,
+} from "@heroicons/react/24/outline";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";

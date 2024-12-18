@@ -208,9 +208,7 @@ export default function AuthPage() {
                       {form.formState.errors.inviteCode.message}
                     </p>
                   )}
-                  <p className="mt-1 text-xs text-brand-500">
-                    *Pendaftaran hanya melalui undangan
-                  </p>
+                  <p className="mt-1 text-xs text-brand-500">*Pendaftaran hanya melalui undangan</p>
                 </div>
                 <Button
                   type="submit"
@@ -230,7 +228,7 @@ export default function AuthPage() {
             href="https://github.com/aqilakmal"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-brand-500 hover:text-brand-600 transition-colors"
+            className="text-brand-500 transition-colors hover:text-brand-600"
           >
             @aqilakmal
           </a>

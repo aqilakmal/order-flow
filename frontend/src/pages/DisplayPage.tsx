@@ -18,11 +18,15 @@ export default function DisplayPage() {
 
   const preparingOrders = orders
     .filter((order: Order) => order.status === OrderStatus.PREPARING)
-    .sort((a: Order, b: Order) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+    .sort(
+      (a: Order, b: Order) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+    );
 
   const completedOrders = orders
     .filter((order: Order) => order.status === OrderStatus.COMPLETED)
-    .sort((a: Order, b: Order) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+    .sort(
+      (a: Order, b: Order) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+    );
 
   const timeSinceLastUpdate = Math.floor((Date.now() - dataUpdatedAt) / 1000);
   const isStale = timeSinceLastUpdate > 30;
@@ -172,7 +176,7 @@ export default function DisplayPage() {
                 href="https://github.com/aqilakmal"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-brand-300 hover:text-brand-200 transition-colors"
+                className="text-brand-300 transition-colors hover:text-brand-200"
               >
                 @aqilakmal
               </a>

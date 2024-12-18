@@ -64,4 +64,4 @@ export function useApi() {
     patch,
     delete: del,
   };
-} 
+}

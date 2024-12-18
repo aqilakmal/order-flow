@@ -14,23 +14,24 @@ Dibuat khusus untuk pemilik bisnis F&B di Indonesia yang membutuhkan solusi sede
 ## ✨ Features
 
 - **Store Management**
+
   - Multi-store support for business owners
   - Unique store IDs for easy access
   - Store details customization
   - Secure store ownership
-
 - **Admin Dashboard**
+
   - Real-time order management
   - Order status updates
   - Order deletion
   - Customer name tracking
-  
 - **Public Order Display**
+
   - Real-time order status updates
   - Clean and intuitive interface
   - Mobile-responsive design
-
 - **Modern Tech Stack**
+
   - Type-safe development with TypeScript
   - Real-time updates with TanStack Query
   - Form validation with Zod
@@ -40,6 +41,7 @@ Dibuat khusus untuk pemilik bisnis F&B di Indonesia yang membutuhkan solusi sede
 ## 🚀 Technologies Used
 
 ### Frontend
+
 - React + Vite
 - TypeScript
 - Tailwind CSS
@@ -52,18 +54,21 @@ Dibuat khusus untuk pemilik bisnis F&B di Indonesia yang membutuhkan solusi sede
 - Jotai (State Management)
 
 ### Backend
+
 - NodeJS
 - Hono (Framework)
 - Drizzle (ORM)
 - Supabase (Auth and Database)
 
 ### DevOps
+
 - Docker
 - Coolify (Deployment)
 
 ## 🛠️ Getting Started
 
 ### Prerequisites
+
 - Node.js 20 or higher
 - npm
 - Docker (for containerized deployment)
@@ -71,12 +76,13 @@ Dibuat khusus untuk pemilik bisnis F&B di Indonesia yang membutuhkan solusi sede
 ### Local Development
 
 1. Clone the repository:
+
    ```bash
-   git clone https://github.com/yourusername/order-flow.git
+   git clone https://github.com/aqilakmal/order-flow.git
    cd order-flow
    ```
-
 2. Install dependencies:
+
    ```bash
    # Frontend
    cd frontend
@@ -86,8 +92,8 @@ Dibuat khusus untuk pemilik bisnis F&B di Indonesia yang membutuhkan solusi sede
    cd ../backend
    npm install
    ```
-
 3. Set up environment variables:
+
    ```bash
    # Backend
    cp backend/.env.example backend/.env
@@ -97,8 +103,8 @@ Dibuat khusus untuk pemilik bisnis F&B di Indonesia yang membutuhkan solusi sede
    cp frontend/.env.example frontend/.env
    # Fill in the required environment variables
    ```
-
 4. Start the development servers:
+
    ```bash
    # Backend
    cd backend
@@ -119,6 +125,7 @@ Dibuat khusus untuk pemilik bisnis F&B di Indonesia yang membutuhkan solusi sede
 ## 📝 Available Scripts
 
 ### Frontend
+
 - `npm run dev` - Start development server
 - `npm run build` - Build for production
 - `npm run preview` - Preview production build
@@ -127,6 +134,7 @@ Dibuat khusus untuk pemilik bisnis F&B di Indonesia yang membutuhkan solusi sede
 - `npm run format:check` - Check code formatting
 
 ### Backend
+
 - `npm run dev` - Start development server
 - `npm run build` - Build for production
 - `npm run start` - Start production server
@@ -136,6 +144,7 @@ Dibuat khusus untuk pemilik bisnis F&B di Indonesia yang membutuhkan solusi sede
 ## 🔒 Environment Variables
 
 ### Backend
+
 - `NODE_ENV` - Environment (development/production)
 - `DATABASE_URL` - PostgreSQL database URL
 - `PORT` - Server port
@@ -146,6 +155,7 @@ Dibuat khusus untuk pemilik bisnis F&B di Indonesia yang membutuhkan solusi sede
 - `INVITE_CODE_START` - Starting code for invite generation
 
 ### Frontend
+
 - `VITE_API_URL` - Backend API URL
 
 ## 📚 API Documentation
@@ -153,12 +163,14 @@ Dibuat khusus untuk pemilik bisnis F&B di Indonesia yang membutuhkan solusi sede
 The application exposes the following API endpoints:
 
 ### Stores
+
 - `GET /stores` - Fetch all stores owned by the authenticated user
 - `POST /stores` - Create a new store
 - `PATCH /stores/:id` - Update store details
 - `DELETE /stores/:id` - Delete a store
 
 ### Orders
+
 - `GET /orders` - Fetch all orders
 - `POST /orders` - Create a new order
 - `PATCH /orders/:id` - Update order status
