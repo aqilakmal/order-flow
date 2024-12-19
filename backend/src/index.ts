@@ -36,11 +36,21 @@ app.route("/auth", authRoutes);
 app.route("/stores", storesRouter);
 app.route("/orders", orderRoutes);
 
-// Public routes
+/**
+ * @description Root endpoint to check if the server is running
+ * @route GET /
+ * @returns {string} 200 - Hello World message
+ */
 app.get("/", (c) => {
   return c.text("Hello World");
 });
 
+/**
+ * @description Health check endpoint to verify database connection
+ * @route GET /health
+ * @returns {Object} 200 - Health status with message
+ * @returns {Object} 500 - Error message if database connection fails
+ */
 app.get("/health", async (c) => {
   try {
     await db.select().from(ordersTable).limit(1);

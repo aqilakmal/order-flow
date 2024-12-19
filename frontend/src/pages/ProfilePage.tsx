@@ -10,6 +10,7 @@ import { Button } from "../components/ui/button";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import { useNavigate } from "react-router-dom";
 
+// Validation schema for password change form with confirmation matching
 const passwordChangeSchema = z
   .object({
     currentPassword: z
@@ -32,12 +33,14 @@ const passwordChangeSchema = z
 
 type PasswordChangeForm = z.infer<typeof passwordChangeSchema>;
 
+// Profile page component for user details and password management
 export default function ProfilePage() {
   const user = useAtomValue(userAtom);
   const { changePassword } = useAuthService();
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  // Initialize form with password change validation
   const form = useForm<PasswordChangeForm>({
     resolver: zodResolver(passwordChangeSchema),
     defaultValues: {
@@ -47,6 +50,7 @@ export default function ProfilePage() {
     },
   });
 
+  // Handle password change submission with success/error notifications
   const onSubmit = async (data: PasswordChangeForm) => {
     try {
       await changePassword(data.currentPassword, data.newPassword);

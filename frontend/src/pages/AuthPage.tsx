@@ -10,7 +10,7 @@ import { Input } from "../components/ui/input";
 import { useToast } from "../hooks/use-toast";
 import { useAuthService } from "../services/auth";
 
-// Form validation schema
+// Validation schema for authentication forms
 const authSchema = z.object({
   email: z.string().email("Format email tidak valid").min(1, "Email wajib diisi"),
   password: z.string().min(6, "Kata sandi minimal 6 karakter").min(1, "Kata sandi wajib diisi"),
@@ -19,11 +19,13 @@ const authSchema = z.object({
 
 type AuthFormValues = z.infer<typeof authSchema>;
 
+// Authentication page component with sign in and sign up functionality
 export default function AuthPage() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { signIn, signUp } = useAuthService();
 
+  // Initialize form with validation schema
   const form = useForm<AuthFormValues>({
     resolver: zodResolver(authSchema),
     defaultValues: {
@@ -33,6 +35,7 @@ export default function AuthPage() {
     },
   });
 
+  // Handle sign in mutation with success/error handling
   const signInMutation = useMutation({
     mutationFn: (data: AuthFormValues) => signIn(data.email, data.password),
     onSuccess: () => {
@@ -51,6 +54,7 @@ export default function AuthPage() {
     },
   });
 
+  // Handle sign up mutation with success/error handling
   const signUpMutation = useMutation({
     mutationFn: (data: AuthFormValues) => signUp(data.email, data.password, data.inviteCode || ""),
     onSuccess: () => {
@@ -69,6 +73,7 @@ export default function AuthPage() {
     },
   });
 
+  // Handle form submission for both sign in and sign up
   const onSubmit = (data: AuthFormValues, isSignIn: boolean) => {
     if (isSignIn) {
       signInMutation.mutate(data);
@@ -77,6 +82,7 @@ export default function AuthPage() {
     }
   };
 
+  // Handle enter key press in form inputs
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>, isSignIn: boolean) => {
     if (e.key === "Enter") {
       e.preventDefault();

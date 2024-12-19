@@ -15,7 +15,14 @@ import type { StatusCode } from "hono/utils/http-status";
 
 const ordersRouter = new Hono();
 
-// Get all orders for a store - public endpoint
+/**
+ * @description Get all orders for a store (public endpoint)
+ * @route GET /orders/:storeId
+ * @param {string} storeId.path.required - Store ID
+ * @returns {Array} 200 - List of orders with timestamps in ISO format
+ * @returns {Object} 404 - Store not found error
+ * @returns {Object} 500 - Error message
+ */
 ordersRouter.get("/:storeId", async (c) => {
   try {
     const storeId = c.req.param("storeId");
@@ -53,7 +60,13 @@ ordersRouter.get("/:storeId", async (c) => {
 // Apply auth middleware to all other order routes
 ordersRouter.use("/*", authMiddleware);
 
-// Helper function to check store ownership
+/**
+ * @description Helper function to check store ownership
+ * @param {string} storeId - Store ID to check
+ * @param {string} userId - User ID to verify ownership
+ * @returns {Promise<{error: string, status: number} | {store: Object}>} Store ownership result
+ * @private
+ */
 async function checkStoreOwnership(storeId: string, userId: string) {
   const store = await db
     .select()
@@ -72,7 +85,20 @@ async function checkStoreOwnership(storeId: string, userId: string) {
   return { store: store[0] };
 }
 
-// Create order for a store
+/**
+ * @description Create a new order for a store
+ * @route POST /orders/:storeId
+ * @security Bearer
+ * @param {string} storeId.path.required - Store ID
+ * @param {Object} body.required - Request body
+ * @param {string} body.customerName - Customer name
+ * @param {string} body.orderDetails - Order details
+ * @param {string} [body.customerPhone] - Customer phone number
+ * @returns {Object} 200 - Created order with timestamps in ISO format
+ * @returns {Object} 400 - Invalid order data error
+ * @returns {Object} 403 - Unauthorized error
+ * @returns {Object} 404 - Store not found error
+ */
 ordersRouter.post("/:storeId", async (c) => {
   try {
     const user = c.get("user");
@@ -108,7 +134,19 @@ ordersRouter.post("/:storeId", async (c) => {
   }
 });
 
-// Update order status
+/**
+ * @description Update order status
+ * @route PATCH /orders/:storeId/:id
+ * @security Bearer
+ * @param {string} storeId.path.required - Store ID
+ * @param {string} id.path.required - Order ID
+ * @param {Object} body.required - Request body
+ * @param {string} body.status - New order status
+ * @returns {Object} 200 - Updated order with timestamps in ISO format
+ * @returns {Object} 400 - Invalid status error
+ * @returns {Object} 403 - Unauthorized error
+ * @returns {Object} 404 - Order not found error
+ */
 ordersRouter.patch("/:storeId/:id", async (c) => {
   try {
     const user = c.get("user");
@@ -147,7 +185,17 @@ ordersRouter.patch("/:storeId/:id", async (c) => {
   }
 });
 
-// Delete order
+/**
+ * @description Delete an order
+ * @route DELETE /orders/:storeId/:id
+ * @security Bearer
+ * @param {string} storeId.path.required - Store ID
+ * @param {string} id.path.required - Order ID
+ * @returns {Object} 200 - Success message
+ * @returns {Object} 403 - Unauthorized error
+ * @returns {Object} 404 - Order not found error
+ * @returns {Object} 500 - Error message
+ */
 ordersRouter.delete("/:storeId/:id", async (c) => {
   try {
     const user = c.get("user");

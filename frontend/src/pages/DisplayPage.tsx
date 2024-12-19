@@ -5,10 +5,12 @@ import { Order, OrderStatus } from "../types";
 import { formatTimestamp } from "../lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 
+// Public display page for showing order status to customers
 export default function DisplayPage() {
   const { storeId } = useParams<{ storeId: string }>();
   const { getOrders } = useOrdersService();
 
+  // Fetch orders with auto-refresh every 5 seconds
   const { data: orders = [], dataUpdatedAt } = useQuery({
     queryKey: ["orders", storeId],
     queryFn: () => (storeId ? getOrders(storeId) : Promise.resolve([])),
@@ -16,21 +18,25 @@ export default function DisplayPage() {
     refetchInterval: 5000,
   });
 
+  // Filter and sort orders in preparation
   const preparingOrders = orders
     .filter((order: Order) => order.status === OrderStatus.PREPARING)
     .sort(
       (a: Order, b: Order) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
     );
 
+  // Filter and sort completed orders
   const completedOrders = orders
     .filter((order: Order) => order.status === OrderStatus.COMPLETED)
     .sort(
       (a: Order, b: Order) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
     );
 
+  // Check if data is stale (over 30 seconds old)
   const timeSinceLastUpdate = Math.floor((Date.now() - dataUpdatedAt) / 1000);
   const isStale = timeSinceLastUpdate > 30;
 
+  // Reusable order card component with status-based styling
   const OrderCard = ({ order, variant }: { order: Order; variant: "preparing" | "completed" }) => (
     <div
       className={`rounded-xl p-4 shadow-sm sm:p-6 ${

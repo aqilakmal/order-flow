@@ -26,7 +26,9 @@ import {
   DropdownMenuTrigger,
 } from "../components/ui/dropdown-menu";
 
+// Admin page for managing stores
 export default function StoresPage() {
+  // State for store editing and modal control
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { toast } = useToast();
@@ -35,6 +37,7 @@ export default function StoresPage() {
   const { signOut } = useAuthService();
   const { getStores, createStore, updateStore, deleteStore } = useStoresService();
 
+  // Initialize form with store creation schema
   const form = useForm<CreateStore>({
     resolver: zodResolver(createStoreSchema),
     defaultValues: {
@@ -43,11 +46,13 @@ export default function StoresPage() {
     },
   });
 
+  // Fetch stores data
   const { data: stores = [], isLoading } = useQuery({
     queryKey: ["stores"],
     queryFn: getStores,
   });
 
+  // Handle store creation with success notification
   const createStoreMutation = useMutation({
     mutationFn: createStore,
     onSuccess: () => {
@@ -61,6 +66,7 @@ export default function StoresPage() {
     },
   });
 
+  // Handle store update with success notification
   const updateStoreMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<CreateStore> }) => updateStore(id, data),
     onSuccess: () => {
@@ -75,6 +81,7 @@ export default function StoresPage() {
     },
   });
 
+  // Handle store deletion with success notification
   const deleteStoreMutation = useMutation({
     mutationFn: deleteStore,
     onSuccess: () => {
@@ -86,6 +93,7 @@ export default function StoresPage() {
     },
   });
 
+  // Handle form submission for both create and update
   const onSubmit = (data: CreateStore) => {
     if (selectedStore) {
       updateStoreMutation.mutate({ id: selectedStore.id, data });
@@ -94,6 +102,7 @@ export default function StoresPage() {
     }
   };
 
+  // Set up store editing mode
   const handleEdit = (store: Store) => {
     setSelectedStore(store);
     form.reset({
@@ -103,12 +112,14 @@ export default function StoresPage() {
     setIsModalOpen(true);
   };
 
+  // Set up store creation mode
   const handleAdd = () => {
     setSelectedStore(null);
     form.reset();
     setIsModalOpen(true);
   };
 
+  // Handle user logout
   const handleLogout = () => {
     signOut();
   };

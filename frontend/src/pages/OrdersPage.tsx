@@ -17,6 +17,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../components/
 import { OrderPad } from "../components/order-pad";
 import { Loading } from "../components/loading";
 
+// Types for order operations
 type UpdateOrderStatusParams = {
   storeId: string;
   id: string;
@@ -28,6 +29,7 @@ type DeleteOrderParams = {
   id: string;
 };
 
+// Page for managing orders of a specific store
 export default function OrdersPage() {
   const { storeId } = useParams<{ storeId: string }>();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -41,6 +43,7 @@ export default function OrdersPage() {
   const navigate = useNavigate();
   const { getOrders, createOrder, updateOrderStatus, deleteOrder } = useOrdersService();
 
+  // Fetch and sort orders with auto-refresh every 5 seconds
   const {
     data: orders = [],
     dataUpdatedAt,
@@ -57,6 +60,7 @@ export default function OrdersPage() {
     },
   });
 
+  // Handle order creation with success notification
   const createOrderMutation = useMutation({
     mutationFn: (data: { orderId: string; name: string }) =>
       storeId
@@ -72,6 +76,7 @@ export default function OrdersPage() {
     },
   });
 
+  // Handle order status update with success notification
   const updateStatusMutation = useMutation({
     mutationFn: ({ storeId, id, status }: UpdateOrderStatusParams) =>
       updateOrderStatus(storeId, id, status),
@@ -84,6 +89,7 @@ export default function OrdersPage() {
     },
   });
 
+  // Handle order deletion with success notification
   const deleteOrderMutation = useMutation({
     mutationFn: ({ storeId, id }: DeleteOrderParams) => deleteOrder(storeId, id),
     onSuccess: () => {
@@ -95,18 +101,21 @@ export default function OrdersPage() {
     },
   });
 
+  // Initialize new order creation flow
   const handleAddOrderClick = () => {
     setIsModalOpen(true);
     setInputStep("orderId");
     setNewOrder({ orderId: "", name: "" });
   };
 
+  // Move to customer name input after order ID
   const handleOrderIdComplete = () => {
     if (newOrder.orderId) {
       setInputStep("name");
     }
   };
 
+  // Complete order creation after customer name
   const handleNameComplete = () => {
     if (newOrder.name) {
       setIsModalOpen(false);
@@ -114,6 +123,7 @@ export default function OrdersPage() {
     }
   };
 
+  // Check if data is stale (over 30 seconds old)
   const timeSinceLastUpdate = Math.floor((Date.now() - dataUpdatedAt) / 1000);
   const isStale = timeSinceLastUpdate > 30;
 

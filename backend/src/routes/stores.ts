@@ -17,7 +17,13 @@ const storesRouter = new Hono();
 // Apply auth middleware to all store routes
 storesRouter.use("/*", authMiddleware);
 
-// Get all stores for the authenticated user
+/**
+ * @description Get all stores for the authenticated user
+ * @route GET /stores
+ * @security Bearer
+ * @returns {Array} 200 - List of stores
+ * @returns {Object} 500 - Error message
+ */
 storesRouter.get("/", async (c) => {
   try {
     const user = c.get("user");
@@ -29,7 +35,17 @@ storesRouter.get("/", async (c) => {
   }
 });
 
-// Create a new store
+/**
+ * @description Create a new store
+ * @route POST /stores
+ * @security Bearer
+ * @param {Object} body.required - Request body
+ * @param {string} body.name - Store name
+ * @param {string} [body.storeId] - Custom store ID (generated if not provided)
+ * @param {string} [body.description] - Store description
+ * @returns {Object} 200 - Created store object
+ * @returns {Object} 400 - Error message
+ */
 storesRouter.post("/", async (c) => {
   try {
     const user = c.get("user");
@@ -68,7 +84,20 @@ storesRouter.post("/", async (c) => {
   }
 });
 
-// Update store
+/**
+ * @description Update store details
+ * @route PATCH /stores/:id
+ * @security Bearer
+ * @param {string} id.path.required - Store ID
+ * @param {Object} body.required - Request body
+ * @param {string} [body.name] - Store name
+ * @param {string} [body.storeId] - Store ID
+ * @param {string} [body.description] - Store description
+ * @returns {Object} 200 - Updated store object
+ * @returns {Object} 400 - Error message
+ * @returns {Object} 403 - Unauthorized error
+ * @returns {Object} 404 - Store not found error
+ */
 storesRouter.patch("/:id", async (c) => {
   try {
     const user = c.get("user");
@@ -117,7 +146,16 @@ storesRouter.patch("/:id", async (c) => {
   }
 });
 
-// Delete store
+/**
+ * @description Delete a store
+ * @route DELETE /stores/:id
+ * @security Bearer
+ * @param {string} id.path.required - Store ID
+ * @returns {Object} 200 - Success message
+ * @returns {Object} 403 - Unauthorized error
+ * @returns {Object} 404 - Store not found error
+ * @returns {Object} 500 - Error message
+ */
 storesRouter.delete("/:id", async (c) => {
   try {
     const user = c.get("user");

@@ -22,6 +22,16 @@ const passwordChangeSchema = z.object({
   newPassword: z.string().min(6),
 });
 
+/**
+ * @description Register a new user with email, password and invite code
+ * @route POST /auth/signup
+ * @param {Object} body.required - Request body
+ * @param {string} body.email - User's email
+ * @param {string} body.password - User's password (min 6 characters)
+ * @param {string} body.inviteCode - Invite code for registration
+ * @returns {Object} 200 - User object and success message
+ * @returns {Object} 400 - Error message
+ */
 auth.post("/signup", async (c) => {
   try {
     const body = await c.req.json();
@@ -57,6 +67,15 @@ auth.post("/signup", async (c) => {
   }
 });
 
+/**
+ * @description Authenticate user with email and password
+ * @route POST /auth/signin
+ * @param {Object} body.required - Request body
+ * @param {string} body.email - User's email
+ * @param {string} body.password - User's password
+ * @returns {Object} 200 - Session and user object
+ * @returns {Object} 400 - Error message
+ */
 auth.post("/signin", async (c) => {
   try {
     const body = await c.req.json();
@@ -85,11 +104,29 @@ auth.post("/signin", async (c) => {
   }
 });
 
+/**
+ * @description Validate user's authentication status
+ * @route GET /auth/validate
+ * @security Bearer
+ * @returns {Object} 200 - User object
+ * @returns {Object} 401 - Unauthorized error
+ */
 auth.get("/validate", authMiddleware, async (c) => {
   const user = c.get("user");
   return c.json({ user });
 });
 
+/**
+ * @description Change user's password
+ * @route POST /auth/change-password
+ * @security Bearer
+ * @param {Object} body.required - Request body
+ * @param {string} body.currentPassword - Current password
+ * @param {string} body.newPassword - New password (min 6 characters)
+ * @returns {Object} 200 - Success message
+ * @returns {Object} 400 - Error message
+ * @returns {Object} 401 - Unauthorized error
+ */
 auth.post("/change-password", authMiddleware, async (c) => {
   try {
     const body = await c.req.json();
