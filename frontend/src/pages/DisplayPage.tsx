@@ -1,9 +1,10 @@
+import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
+import { formatTimestamp } from "../lib/utils";
 import { useOrdersService } from "../services/orders";
 import { Order, OrderStatus } from "../types";
-import { formatTimestamp } from "../lib/utils";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 
 // Public display page for showing order status to customers
 export default function DisplayPage() {
@@ -50,14 +51,24 @@ export default function DisplayPage() {
             <span className="font-normal text-white/75">xxxx</span>
             <span>{order.orderId}</span>
           </div>
-          <div
-            className={`rounded-full px-3 py-1 text-xs font-medium sm:px-4 sm:py-2 sm:text-base ${
-              variant === "preparing"
-                ? "text-brand-950 bg-brand-300"
-                : "bg-green-300 text-green-950"
-            }`}
-          >
-            {variant === "preparing" ? "Sedang di Masak" : "Selesai"}
+          <div className="flex items-center gap-2">
+            <div
+              className={`rounded-full px-3 py-1 text-xs font-medium sm:px-4 sm:py-2 sm:text-base ${
+                variant === "preparing"
+                  ? "text-brand-950 bg-brand-300"
+                  : "bg-green-300 text-green-950"
+              }`}
+            >
+              {variant === "preparing" ? "Sedang di Masak" : "Selesai"}
+            </div>
+            {variant === "preparing" && (
+              <div className="relative flex h-[22px] w-[22px] sm:h-[34px] sm:w-[34px]">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75"></span>
+                <span className="relative inline-flex h-full w-full items-center justify-center rounded-full bg-white">
+                  <ArrowPathIcon className="h-3 w-3 animate-spin stroke-2 text-brand-500 sm:h-5 sm:w-5" />
+                </span>
+              </div>
+            )}
           </div>
         </div>
         <div className="flex items-center justify-between">
