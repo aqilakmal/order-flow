@@ -1,21 +1,21 @@
 import {
+  ArrowLeftIcon,
+  ArrowPathIcon,
+  CheckIcon,
   PlusIcon,
   TrashIcon,
-  CheckIcon,
-  ArrowPathIcon,
-  ArrowLeftIcon,
 } from "@heroicons/react/24/outline";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { Loading } from "../components/loading";
+import { OrderPad } from "../components/order-pad";
 import { Button } from "../components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../components/ui/dialog";
 import { useToast } from "../hooks/use-toast";
+import { formatTimestamp } from "../lib/utils";
 import { useOrdersService } from "../services/orders";
 import { OrderStatus, type Order } from "../types";
-import { formatTimestamp } from "../lib/utils";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../components/ui/dialog";
-import { OrderPad } from "../components/order-pad";
-import { Loading } from "../components/loading";
 
 // Types for order operations
 type UpdateOrderStatusParams = {
@@ -359,12 +359,12 @@ export default function OrdersPage() {
               <span className="hidden sm:inline">Made by </span>
               <span className="inline sm:hidden">By </span>
               <a
-                href="https://github.com/aqilakmal"
+                href="https://github.com/faqihxdev"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-brand-300 transition-colors hover:text-brand-200"
               >
-                @aqilakmal
+                @faqihxdev
               </a>
             </h1>
           </div>

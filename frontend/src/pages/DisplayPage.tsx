@@ -190,12 +190,12 @@ export default function DisplayPage() {
               <span className="hidden sm:inline">Made by </span>
               <span className="inline sm:hidden">By </span>
               <a
-                href="https://github.com/aqilakmal"
+                href="https://github.com/faqihxdev"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-brand-300 transition-colors hover:text-brand-200"
               >
-                @aqilakmal
+                @faqihxdev
               </a>
             </h1>
           </div>

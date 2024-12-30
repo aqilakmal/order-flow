@@ -78,7 +78,7 @@ Dibuat khusus untuk pemilik bisnis F&B di Indonesia yang membutuhkan solusi sede
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/aqilakmal/order-flow.git
+   git clone https://github.com/faqihxdev/order-flow.git
    cd order-flow
    ```
 2. Install dependencies:
@@ -182,4 +182,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 👨‍💻 Author
 
-Made with ❤️ by [@aqilakmal](https://github.com/aqilakmal)
+Made with ❤️ by [@faqihxdev](https://github.com/faqihxdev)

@@ -1,12 +1,12 @@
-import { KeyboardEvent } from "react";
-import { useNavigate } from "react-router-dom";
-import { useMutation } from "@tanstack/react-query";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
+import { KeyboardEvent } from "react";
+import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
 import { z } from "zod";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { useToast } from "../hooks/use-toast";
 import { useAuthService } from "../services/auth";
 
@@ -231,12 +231,12 @@ export default function AuthPage() {
         <div className="mt-4 text-center text-xs text-neutral-500">
           Made by{" "}
           <a
-            href="https://github.com/aqilakmal"
+            href="https://github.com/faqihxdev"
             target="_blank"
             rel="noopener noreferrer"
             className="text-brand-500 transition-colors hover:text-brand-600"
           >
-            @aqilakmal
+            @faqihxdev
           </a>
         </div>
       </div>
